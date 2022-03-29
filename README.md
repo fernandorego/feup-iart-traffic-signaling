@@ -11,7 +11,7 @@ TBD
 
 #### Executing
 1. Install given modules, using `pip install .`, which calls `setup.py`. You do not need to call `setup.py` directly.
-2. Run the main script, using `python traffic_signaling/main.py`.
+2. Run the main script.
 
 #### Testing
-1. Run `pytest`. All functions named `test_*` present in the scripts wich filename is like `test_*` are automatically analysed. 
+1. Run `pytest`. All functions named `test_*` present in scripts named `test_*` are automatically analysed. 
