@@ -69,8 +69,10 @@ class Schedule:
                 if len(car_paths[car_id]) == 0:  # is parked at the final street
                     score += 1
                     continue
+
                 name, position = car_position[car_id]
                 street_length = city.street_length(name)
+
                 # car driving on street
                 if position < street_length:
                     position += 1
@@ -85,8 +87,6 @@ class Schedule:
                                 continue
                             street_queue[name] = street_queue[name][1:]
                             car_paths[car_id] = car_paths[car_id][1:]
-                            print(car_id, str(
-                                car_paths[car_id]), car_position[car_id], remaining)
                             car_position[car_id] = (destination, 0)
                             break
                     if len(car_paths[car_id]) == 1:  # reached final destination
