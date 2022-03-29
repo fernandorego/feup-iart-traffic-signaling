@@ -14,15 +14,15 @@ class City:
     def from_input(input_file: str):
         with open(input_file) as f:
             lines = f.readlines()
+        lines = [line.strip('\n').split(' ') for line in lines]
+
         city = City()
-        duration, _, no_streets, no_cars, bonus = lines[0].split(
-            ' ')
+        duration, _, no_streets, no_cars, bonus = lines[0]
         city.bonus = int(bonus)
         city.duration = int(duration)
 
         # add streets
         for line in lines[1:1+int(no_streets)]:
-            line = line.strip('\n').split(' ')
             start_intersection = Intersection(int(line[0]))
             end_intersection = Intersection(int(line[1]))
             street = Street(line[2], int(line[3]))
@@ -46,7 +46,6 @@ class City:
         # add cars
         current_car: int = 0
         for line in lines[1+int(no_streets):1+int(no_streets)+int(no_cars)]:
-            line = line.strip('\n').split(' ')
             path = []
             for name in line[1:]:
                 path.append([s for s in city.streets if s.name == name][0])
