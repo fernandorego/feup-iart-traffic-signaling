@@ -46,13 +46,16 @@ class Schedule:
             car_position[car_id] = (car.path[0].name, car.path[0].length)
             street_queue[car.path[0].name].append(car_id)
 
+        # copy schedule
+        schedule = copy.deepcopy(self.schedule)
+
         # current intersection green light
         intersection_green_light = {}
-        for intersection_id in self.schedule:
-            intersection_green_light[intersection_id] = {
-                self.schedule[intersection_id][0][0]}
-            self.schedule[intersection_id].append(
-                self.schedule[intersection_id][0])  # for wrapping
+        for intersection_id in schedule:
+            intersection_green_light[intersection_id] = \
+                schedule[intersection_id][0][0]
+            schedule[intersection_id].append(
+                schedule[intersection_id][0])  # for wrapping
 
         # copy car paths
         car_paths = {}
@@ -63,48 +66,53 @@ class Schedule:
         # run simulation
         score = 0
         remaining = city.duration
-        while remaining > 0:
+        while 1:
             # update car state
             for car_id in city.cars:
-                if car_paths[car_id] == []:
+                if len(car_paths[car_id]) == 0:
                     score += 1
+                    continue
+                if len(car_paths[car_id]) == 1:  # reached destination
+                    score += city.bonus
+                    car_paths[car_id] = []
+                    continue
                 name, position = car_position[car_id]
-                # car driving on street
                 street_length = city.street_length(name)
+                # car driving on street
                 if position < street_length:
-                    position = position + 1
+                    position += 1
                     if position == street_length:
                         street_queue[name].append(car_id)
                     car_position[car_id] = (name, position)
                 else:
-                    if len(car_paths[car_id]) == 1:  # reached destination
-                        score += city.bonus
-                        car_paths[car_id] = []
-                        continue
                     destination = car_paths[car_id][1]
                     for i in intersection_green_light:
                         if intersection_green_light[i] == destination:
-                            if street_queue[name] == []:
-                                raise "Street queue is empty while car is waiting"
                             if street_queue[name][0] != car_id:
                                 continue
                             street_queue[name] = street_queue[name][1:]
                             car_paths[car_id] = car_paths[car_id][1:]
+                            print(car_id, str(car_paths[car_id]),
+                                  car_position[car_id], remaining)
                             car_position[car_id] = (
                                 destination, 0)
 
-            # update traffic light state
-            for intersection_id in self.schedule:
-                name, duration = self.schedule[intersection_id][0]
-                if duration == 0:
-                    self.schedule[intersection_id].append((name, duration))
-                    self.schedule[intersection_id] = self.schedule[intersection_id][1:]
-                    intersection_green_light[intersection_id] = self.schedule[intersection_id][0]
-                else:
-                    duration = duration - 1
-                    self.schedule[intersection_id][0] = (name, duration)
-
+            # no time left
+            if remaining == 0:
+                return score
             remaining -= 1
+
+            # update traffic light state
+            for intersection_id in schedule:
+                name, duration = schedule[intersection_id][0]
+                duration = duration - 1
+                if duration <= 0:
+                    schedule[intersection_id].append(
+                        (name, [i[1] for i in self.schedule[intersection_id] if i[0] == name][0]))
+                    schedule[intersection_id] = schedule[intersection_id][1:]
+                    intersection_green_light[intersection_id] = schedule[intersection_id][0][0]
+                else:
+                    schedule[intersection_id][0] = (name, duration)
         return score
 
     def __str__(self):
