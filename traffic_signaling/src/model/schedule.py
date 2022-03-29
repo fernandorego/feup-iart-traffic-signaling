@@ -52,16 +52,13 @@ class Schedule:
         # current intersection green light
         intersection_green_light = {}
         for intersection_id in schedule:
-            intersection_green_light[intersection_id] = \
-                schedule[intersection_id][0][0]
-            schedule[intersection_id].append(
-                schedule[intersection_id][0])  # for wrapping
+            intersection_green_light[intersection_id] = schedule[intersection_id][0][0]
 
         # copy car paths
         car_paths = {}
         for car_id in city.cars:
             car_paths[car_id] = copy.deepcopy(city.cars[car_id].path)
-            car_paths[car_id] = list(map(lambda s: s.name, car_paths[car_id]))
+            car_paths[car_id] = [s.name for s in car_paths[car_id]]
 
         # run simulation
         score = 0
@@ -69,21 +66,17 @@ class Schedule:
         while 1:
             # update car state
             for car_id in city.cars:
-                if len(car_paths[car_id]) == 0:
+                if len(car_paths[car_id]) == 0:  # is parked at the final street
                     score += 1
-                    continue
-                if len(car_paths[car_id]) == 1:  # reached destination
-                    score += city.bonus
-                    car_paths[car_id] = []
                     continue
                 name, position = car_position[car_id]
                 street_length = city.street_length(name)
                 # car driving on street
                 if position < street_length:
                     position += 1
+                    car_position[car_id] = (name, position)
                     if position == street_length:
                         street_queue[name].append(car_id)
-                    car_position[car_id] = (name, position)
                 else:
                     destination = car_paths[car_id][1]
                     for i in intersection_green_light:
@@ -92,10 +85,14 @@ class Schedule:
                                 continue
                             street_queue[name] = street_queue[name][1:]
                             car_paths[car_id] = car_paths[car_id][1:]
-                            print(car_id, str(car_paths[car_id]),
-                                  car_position[car_id], remaining)
-                            car_position[car_id] = (
-                                destination, 0)
+                            print(car_id, str(
+                                car_paths[car_id]), car_position[car_id], remaining)
+                            car_position[car_id] = (destination, 0)
+                            break
+                    if len(car_paths[car_id]) == 1:  # reached final destination
+                        score += city.bonus
+                        car_paths[car_id] = []
+                        continue
 
             # no time left
             if remaining == 0:
@@ -113,7 +110,6 @@ class Schedule:
                     intersection_green_light[intersection_id] = schedule[intersection_id][0][0]
                 else:
                     schedule[intersection_id][0] = (name, duration)
-        return score
 
     def __str__(self):
         s = ""

@@ -10,7 +10,7 @@ TBD
 TBD
 
 #### Executing
-1. Install given modules, using `pip install .`, which calls `setup.py`. You do not need to call `setup.py` directly.
+1. Install given modules in editable mode, using `pip install -e .`, which calls `setup.py`. You do not need to call `setup.py` directly.
 2. Run the main script.
 
 #### Testing
