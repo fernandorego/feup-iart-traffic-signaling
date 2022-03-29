@@ -6,3 +6,5 @@ if __name__ == '__main__':
     print(city)
     schedule = Schedule.from_input('traffic_signaling/asset/output_sample.txt')
     print(schedule)
+    print()
+    print(schedule.evaluate(city))

@@ -1,19 +1,8 @@
-class TrafficLight:
-    RED = 0
-    GREEN = 1
-
-
 class Intersection:
-    def __init__(self, id: int):
+    def __init__(self):
         self.id = id
-        self.incoming_streets = dict()
+        self.incoming_streets = set()
         self.outgoing_streets = set()
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, Intersection) and self.id == other.id
-
-    def __hash__(self):
-        return self.id
 
     def __str__(self):
         return str(self.id)
