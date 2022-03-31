@@ -30,16 +30,18 @@ class City:
 
         # connect intersections through streets
         street_by_name = {}  # helper for later exploring cars
+        city_id = 0
         for line in lines[1:1+int(no_streets)]:
             start_intersection_id = int(line[0])
             end_intersection_id = int(line[1])
-            street = Street(line[2], int(line[3]))
+            street = Street(city_id, line[2], int(line[3]))
             street_by_name[street.name] = street
             city.streets.append(street)
             city.intersections[start_intersection_id].outgoing_streets.add(
                 street)
             city.intersections[end_intersection_id].incoming_streets.add(
                 street)
+            city_id += 1
 
         # add cars
         current_car: int = 0

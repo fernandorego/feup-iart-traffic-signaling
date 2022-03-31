@@ -1,3 +1,4 @@
+from time import sleep
 from .city import City
 import copy
 
@@ -18,36 +19,29 @@ class Schedule:
             intersection_id = int(lines[0][0])
             no_streets = int(lines[1][0])
             lines = lines[2:]
-            for _ in range(no_streets):
-                name, duration = lines[0]
-                if intersection_id in schedule.schedule:
-                    schedule.schedule[intersection_id].append(
-                        (name, int(duration)))
-                else:
-                    schedule.schedule[intersection_id] = [
-                        (name, int(duration))]
-                lines = lines[1:]
+            schedule.schedule[intersection_id] = [
+                (name, int(duration)) for name, duration in lines[:no_streets]]
+            lines = lines[no_streets:]
 
         return schedule
 
     def evaluate(self, city: City):
-        # street
-        street_queue = {s.name: [] for s in city.streets}
-
-        # car positions
-        car_path = {}
-        car_position = {}
-        for car in city.cars:
-            car_path[car.id] = car.path.copy()
-            street_queue[car_path[car.id][0].name].append(car.id)
-            car_position[car.id] = car_path[car.id][0].length
-
         # setup green_lights
+        street_queue = {city_id: [] for city_id in range(city.no_streets)}
         green_lights = {}
         for intersection_id in self.schedule:
             green_lights[intersection_id] = [
                 name for name, time in self.schedule[intersection_id] for _ in range(time)]
 
+        # setup car positions
+        car_path = {}
+        car_position = {}
+        for car in city.cars:
+            car_path[car.id] = car.path.copy()
+            street_queue[car_path[car.id][0].id].append(car.id)
+            car_position[car.id] = car_path[car.id][0].length
+
+        # run simulation
         score = 0
         car_ids = [car.id for car in city.cars]
         for current_time in range(city.duration+1):
@@ -63,13 +57,13 @@ class Schedule:
                             score += city.car_value + city.duration - current_time
                             car_path[car_id] = []
                             continue
-                        street_queue[street.name].append(car_id)
-                if car_position[car_id] == street.length and street_queue[street.name][0] == car_id:
+                        street_queue[street.id].append(car_id)
+                if car_position[car_id] == street.length and street_queue[street.id][0] == car_id:
                     intersection_id = city.street_intersection[street.name]
                     if green_lights[intersection_id][current_time % len(green_lights[intersection_id])] != street.name or intersection_id in crossed_intersections:
                         continue
                     crossed_intersections.append(intersection_id)
-                    street_queue[street.name] = street_queue[street.name][1:]
+                    street_queue[street.id] = street_queue[street.id][1:]
                     car_position[car_id] = 0
                     car_path[car_id] = car_path[car_id][1:]
         return score
