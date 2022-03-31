@@ -47,11 +47,13 @@ class Schedule:
 
         # setup green_lights
         green_lights = {}
+        green_cycle = {}
         for intersection_id in self.schedule:
             green_lights[intersection_id] = []
             for name, time in self.schedule[intersection_id]:
                 green_lights[intersection_id].extend(
                     [name for _ in range(time)])
+            green_cycle[intersection_id] = len(green_lights[intersection_id])
 
         score = 0
         car_ids = [car.id for car in city.cars]
@@ -71,12 +73,14 @@ class Schedule:
                         street_queue[street_name].append(car_id)
                 if car_position[car_id] == street_length and street_queue[street_name][0] == car_id:
                     for intersection_id in self.schedule:
-                        if green_lights[intersection_id][current_time % len(green_lights[intersection_id])] != street_name:
+                        if green_lights[intersection_id][current_time % green_cycle[intersection_id]] != street_name:
                             continue
                         street_queue[street_name] = street_queue[street_name][1:]
                         car_position[car_id] = 0
                         car_path[car_id] = car_path[car_id][1:]
                         break
+                print(current_time, 'y' if car_id == 0 else 'x', car_position[car_id],
+                      car_path[car_id])
         return score
 
     def __str__(self):
