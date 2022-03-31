@@ -2,7 +2,8 @@ from traffic_signaling.src.model.city import City
 from traffic_signaling.src.model.schedule import Schedule
 
 a_city = City.from_input('traffic_signaling/asset/data/a.txt')
-b_city = City.from_input('traffic_signaling/asset/data/e.txt')
+e_city = City.from_input('traffic_signaling/asset/data/e.txt')
+b_city = City.from_input('traffic_signaling/asset/data/b.txt')
 
 
 def test_a_solution1():
@@ -22,9 +23,14 @@ def test_a_solution3():
 
 def test_e_solution1():
     schedule = Schedule.from_input('traffic_signaling/asset/out/e1.txt')
-    assert(schedule.evaluate(b_city) == 681875)
+    assert(schedule.evaluate(e_city) == 681875)
 
 
 def test_e_solution2():
     schedule = Schedule.from_input('traffic_signaling/asset/out/e2.txt')
-    assert(schedule.evaluate(b_city) == 710095)
+    assert(schedule.evaluate(e_city) == 710095)
+
+
+def test_b_solution1():
+    schedule = Schedule.from_input('traffic_signaling/asset/out/b1.txt')
+    assert(schedule.evaluate(b_city) == 4566783)
