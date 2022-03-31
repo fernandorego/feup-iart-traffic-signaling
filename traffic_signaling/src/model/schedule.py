@@ -60,7 +60,9 @@ class Schedule:
                         street_queue[street.id].append(car_id)
                 if car_position[car_id] == street.length and street_queue[street.id][0] == car_id:
                     intersection_id = city.street_intersection[street.name]
-                    if green_lights[intersection_id][current_time % len(green_lights[intersection_id])] != street.name or intersection_id in crossed_intersections:
+                    light_is_green = green_lights[intersection_id][current_time % len(
+                        green_lights[intersection_id])] == street.name
+                    if not light_is_green or intersection_id in crossed_intersections:
                         continue
                     crossed_intersections.append(intersection_id)
                     street_queue[street.id] = street_queue[street.id][1:]
