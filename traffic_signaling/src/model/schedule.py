@@ -79,8 +79,6 @@ class Schedule:
                         car_position[car_id] = 0
                         car_path[car_id] = car_path[car_id][1:]
                         break
-                print(current_time, 'y' if car_id == 0 else 'x', car_position[car_id],
-                      car_path[car_id])
         return score
 
     def __str__(self):
