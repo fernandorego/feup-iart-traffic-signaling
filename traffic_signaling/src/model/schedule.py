@@ -57,6 +57,7 @@ class Schedule:
         score = 0
         car_ids = [car.id for car in city.cars]
         for current_time in range(city.duration+1):
+            crossed_intersections = []
             for car_id in car_ids:
                 if car_path[car_id] == []:
                     continue
@@ -71,8 +72,9 @@ class Schedule:
                         street_queue[street.name].append(car_id)
                 if car_position[car_id] == street.length and street_queue[street.name][0] == car_id:
                     intersection_id = city.street_intersection[street.name]
-                    if green_lights[intersection_id][current_time % green_cycle[intersection_id]] != street.name:
+                    if green_lights[intersection_id][current_time % green_cycle[intersection_id]] != street.name or intersection_id in crossed_intersections:
                         continue
+                    crossed_intersections.append(intersection_id)
                     street_queue[street.name] = street_queue[street.name][1:]
                     car_position[car_id] = 0
                     car_path[car_id] = car_path[car_id][1:]
