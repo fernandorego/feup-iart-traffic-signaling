@@ -6,5 +6,5 @@ class Car:
     def __eq__(self, other):
         return isinstance(other, Car) and other.path == self.path
 
-    def __hash__(self) -> int:
-        return hash(self.id)
+    def __hash__(self):
+        return self.id
