@@ -32,27 +32,21 @@ class Schedule:
 
     def evaluate(self, city: City):
         # street
-        street_queue = {}
-        for s in city.streets:
-            street_queue[s.name] = []
+        street_queue = {s.name: [] for s in city.streets}
 
         # car positions
         car_path = {}
         car_position = {}
         for car in city.cars:
-            car_path[car.id] = [s for s in car.path]
+            car_path[car.id] = car.path.copy()
             street_queue[car_path[car.id][0].name].append(car.id)
             car_position[car.id] = car_path[car.id][0].length
 
         # setup green_lights
         green_lights = {}
-        green_cycle = {}
         for intersection_id in self.schedule:
-            green_lights[intersection_id] = []
-            for name, time in self.schedule[intersection_id]:
-                green_lights[intersection_id].extend(
-                    [name for _ in range(time)])
-            green_cycle[intersection_id] = len(green_lights[intersection_id])
+            green_lights[intersection_id] = [
+                name for name, time in self.schedule[intersection_id] for _ in range(time)]
 
         score = 0
         car_ids = [car.id for car in city.cars]
@@ -72,7 +66,7 @@ class Schedule:
                         street_queue[street.name].append(car_id)
                 if car_position[car_id] == street.length and street_queue[street.name][0] == car_id:
                     intersection_id = city.street_intersection[street.name]
-                    if green_lights[intersection_id][current_time % green_cycle[intersection_id]] != street.name or intersection_id in crossed_intersections:
+                    if green_lights[intersection_id][current_time % len(green_lights[intersection_id])] != street.name or intersection_id in crossed_intersections:
                         continue
                     crossed_intersections.append(intersection_id)
                     street_queue[street.name] = street_queue[street.name][1:]

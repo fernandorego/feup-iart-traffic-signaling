@@ -6,9 +6,10 @@ from .intersection import Intersection
 class City:
     def __init__(self):
         self.cars = []
-        self.streets = set()
+        self.streets = []
         self.intersections = {}  # by intersection_id
         self.street_intersection = {}  # by street name
+        self.no_streets = 0
         self.duration = 0
         self.car_value = 0
 
@@ -19,6 +20,7 @@ class City:
 
         city = City()
         duration, no_intersections, no_streets, no_cars, bonus = lines[0]
+        city.no_streets = int(no_streets)
         city.car_value = int(bonus)
         city.duration = int(duration)
 
@@ -33,7 +35,7 @@ class City:
             end_intersection_id = int(line[1])
             street = Street(line[2], int(line[3]))
             street_by_name[street.name] = street
-            city.streets.add(street)
+            city.streets.append(street)
             city.intersections[start_intersection_id].outgoing_streets.add(
                 street)
             city.intersections[end_intersection_id].incoming_streets.add(
