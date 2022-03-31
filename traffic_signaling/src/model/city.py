@@ -5,7 +5,7 @@ from .intersection import Intersection
 
 class City:
     def __init__(self):
-        self.cars = dict()
+        self.cars = []
         self.streets = set()
         self.intersections = dict()
         self.duration = 0
@@ -52,8 +52,8 @@ class City:
             path = []
             for name in line[1:]:
                 path.append([s for s in city.streets if s.name == name][0])
-            car = Car(path)
-            city.cars[current_car] = car
+            car = Car(current_car, path)
+            city.cars.append(car)
             current_car += 1
         return city
 
@@ -64,9 +64,9 @@ class City:
         for street in self.streets:
             s += str(street.name) + " has L=" + str(street.length) + "\n"
         s += "--------\n"
-        for car_no in self.cars:
-            s += "Car " + str(car_no) + " path: " + \
-                str([st.name for st in self.cars[car_no].path]) + "\n"
+        for car in self.cars:
+            s += "Car " + str(car.id) + " path: " + \
+                str([st.name for st in car.path]) + "\n"
         s += "--------\n"
         for intersection_id in self.intersections:
             s += "Intersection " + str(intersection_id) + " connects " + str(
@@ -78,4 +78,4 @@ class City:
         for s in self.streets:
             if s.name == name:
                 return s.length
-        raise "Street not found"
+        raise Exception("Street not found")
