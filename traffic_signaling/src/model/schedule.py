@@ -66,7 +66,7 @@ class Schedule:
                     car_position[car_id] += 1
                     if car_position[car_id] == street.length:
                         if car_path[car_id][1:] == []:
-                            score += city.bonus + city.duration - current_time
+                            score += city.car_value + city.duration - current_time
                             car_path[car_id] = []
                             continue
                         street_queue[street.name].append(car_id)
