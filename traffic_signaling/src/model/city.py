@@ -8,6 +8,7 @@ class City:
         self.cars = []
         self.streets = set()
         self.intersections = dict()
+        self.street_intersection = {}
         self.duration = 0
         self.bonus = 0
 
@@ -55,6 +56,12 @@ class City:
             car = Car(current_car, path)
             city.cars.append(car)
             current_car += 1
+
+        # calculate helper street intersection
+        for intersection_id in city.intersections:
+            for incoming_street in city.intersections[intersection_id].incoming_streets:
+                city.street_intersection[incoming_street.name] = intersection_id
+
         return city
 
     def __str__(self):
@@ -73,9 +80,3 @@ class City:
                 [st.name for st in self.intersections[intersection_id].incoming_streets]) + " to "\
                 + str([st.name for st in self.intersections[intersection_id].outgoing_streets]) + "\n"
         return s
-
-    def street_length(self, name: str):
-        for s in self.streets:
-            if s.name == name:
-                return s.length
-        raise Exception("Street not found")
