@@ -35,11 +35,11 @@ class Schedule:
 
         # setup car positions
         car_path = {}
-        car_position = {}
+        next_analysed_time = {}
         for car in city.cars:
             car_path[car.id] = car.path.copy()
             street_queue[car_path[car.id][0].id].append(car.id)
-            car_position[car.id] = car_path[car.id][0].length
+            next_analysed_time[car.id] = 0
 
         # run simulation
         score = 0
@@ -47,18 +47,10 @@ class Schedule:
         for current_time in range(city.duration+1):
             crossed_intersections = []
             for car_id in car_ids:
-                if car_path[car_id] == []:
+                if car_path[car_id] == [] or next_analysed_time[car_id] > current_time:
                     continue
                 street = car_path[car_id][0]
-                if car_position[car_id] < street.length:
-                    car_position[car_id] += 1
-                    if car_position[car_id] == street.length:
-                        if car_path[car_id][1:] == []:
-                            score += city.car_value + city.duration - current_time
-                            car_path[car_id] = []
-                            continue
-                        street_queue[street.id].append(car_id)
-                if car_position[car_id] == street.length and street_queue[street.id][0] == car_id:
+                if street_queue[street.id][0] == car_id:
                     intersection_id = city.street_intersection[street.name]
                     light_is_green = green_lights[intersection_id][current_time % len(
                         green_lights[intersection_id])] == street.name
@@ -66,8 +58,17 @@ class Schedule:
                         continue
                     crossed_intersections.append(intersection_id)
                     street_queue[street.id] = street_queue[street.id][1:]
-                    car_position[car_id] = 0
                     car_path[car_id] = car_path[car_id][1:]
+                    next_street = car_path[car_id][0]
+                    if car_path[car_id][1:] == []:
+                        car_path[car_id] = []
+                        if current_time + next_street.length > city.duration:
+                            continue
+                        score += city.car_value + city.duration - current_time - next_street.length
+                    else:
+                        street_queue[next_street.id].append(car_id)
+                        next_analysed_time[car_id] = current_time + \
+                            next_street.length
         return score
 
     def __str__(self):
