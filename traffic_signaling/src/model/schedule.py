@@ -28,6 +28,8 @@ class Schedule:
         # setup simulation helpers
         street_queue = {street_id: deque()
                         for street_id in range(city.no_streets)}
+        green_cycle_duration = {intersection_id: len(self.schedule[intersection_id])
+                                for intersection_id in self.schedule}
         car_path = {}
         next_analysed_time = {}
         for car in city.cars:
@@ -48,7 +50,7 @@ class Schedule:
                     continue
                 intersection_id = city.street_intersection[street.name]
                 light_is_green = self.schedule[intersection_id][current_time %
-                                                                len(self.schedule[intersection_id])] == street.name
+                                                                green_cycle_duration[intersection_id]] == street.name
                 if not light_is_green or intersection_id in crossed_intersections:
                     continue
                 crossed_intersections.append(intersection_id)
@@ -65,6 +67,7 @@ class Schedule:
                     next_analysed_time[car_id] = next_time
             for car_id in scheduled_removals:
                 del car_path[car_id]
+
         return score
 
     def __str__(self):
