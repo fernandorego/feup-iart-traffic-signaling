@@ -12,6 +12,7 @@ class City:
         self.no_streets = 0
         self.duration = 0
         self.car_value = 0
+        self.no_intersections = 0
 
     def from_input(input_file: str):
         with open(input_file) as f:
@@ -23,10 +24,10 @@ class City:
         city.no_streets = int(no_streets)
         city.car_value = int(bonus)
         city.duration = int(duration)
+        city.no_intersections = int(no_intersections)
 
         # add blank intersections
-        for intersection_id in range(int(no_intersections)):
-            city.intersections[intersection_id] = Intersection()
+        city.intersections = {intersection_id: Intersection() for intersection_id in range(int(no_intersections))}
 
         # connect intersections through streets
         street_by_name = {}  # helper for later exploring cars
@@ -44,7 +45,7 @@ class City:
             city_id += 1
 
         # add cars
-        current_car: int = 0
+        current_car = 0
         for line in lines[1+int(no_streets):1+int(no_streets)+int(no_cars)]:
             path = [street_by_name[name] for name in line[1:]]
             car = Car(current_car, path)

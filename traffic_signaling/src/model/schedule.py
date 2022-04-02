@@ -12,21 +12,21 @@ class Schedule:
         lines = [line.strip('\n').split(' ') for line in lines]
 
         schedule = Schedule()
-        no_intersections = int(lines[0][0])
         lines = lines[1:]
-        for _ in range(no_intersections):
-            intersection_id = int(lines[0][0])
-            no_streets = int(lines[1][0])
-            lines = lines[2:]
+        i = 0
+        l_size = len(lines)
+        while i < l_size:
+            intersection_id = int(lines[i][0])
+            no_streets = int(lines[i+1][0])
             schedule.schedule[intersection_id] = [
-                name for name, duration in lines[:no_streets] for _ in range(int(duration))]
-            lines = lines[no_streets:]
+                name for name, duration in lines[i+2:i+2+no_streets] for _ in range(int(duration))]
+            i += no_streets+2
 
         return schedule
 
     def evaluate(self, city: City):
         # setup simulation helpers
-        street_queue = {city_id: [] for city_id in range(city.no_streets)}
+        street_queue = {street_id: [] for street_id in range(city.no_streets)}
         car_path = {}
         next_analysed_time = {}
         for car in city.cars:
@@ -43,7 +43,7 @@ class Schedule:
                 if next_analysed_time[car_id] > current_time:
                     continue
                 street = car_path[car_id][0]
-                if street_queue[street.id][0] != car_id:
+                if street_queue[car_path[car_id][0].id][0] != car_id:
                     continue
                 intersection_id = city.street_intersection[street.name]
                 light_is_green = self.schedule[intersection_id][current_time %
@@ -57,9 +57,8 @@ class Schedule:
                 next_time = current_time + next_street.length
                 if car_path[car_id][1:] == []:
                     scheduled_removals.append(car_id)
-                    if next_time > city.duration:
-                        continue
-                    score += city.car_value + city.duration - next_time
+                    if next_time <= city.duration:
+                        score += city.car_value + city.duration - next_time
                 else:
                     street_queue[next_street.id].append(car_id)
                     next_analysed_time[car_id] = next_time
