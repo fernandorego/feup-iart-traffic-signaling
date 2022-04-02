@@ -1,6 +1,5 @@
-from time import sleep
+from collections import deque
 from .city import City
-import copy
 
 
 class Schedule:
@@ -13,61 +12,62 @@ class Schedule:
         lines = [line.strip('\n').split(' ') for line in lines]
 
         schedule = Schedule()
-        no_intersections = int(lines[0][0])
         lines = lines[1:]
-        for _ in range(no_intersections):
-            intersection_id = int(lines[0][0])
-            no_streets = int(lines[1][0])
-            lines = lines[2:]
+        i = 0
+        l_size = len(lines)
+        while i < l_size:
+            intersection_id = int(lines[i][0])
+            no_streets = int(lines[i+1][0])
             schedule.schedule[intersection_id] = [
-                (name, int(duration)) for name, duration in lines[:no_streets]]
-            lines = lines[no_streets:]
+                name for name, duration in lines[i+2:i+2+no_streets] for _ in range(int(duration))]
+            i += no_streets + 2
 
         return schedule
 
     def evaluate(self, city: City):
-        # setup green_lights
-        street_queue = {city_id: [] for city_id in range(city.no_streets)}
-        green_lights = {}
-        for intersection_id in self.schedule:
-            green_lights[intersection_id] = [
-                name for name, time in self.schedule[intersection_id] for _ in range(time)]
-
-        # setup car positions
+        # setup simulation helpers
+        street_queue = {street_id: deque()
+                        for street_id in range(city.no_streets)}
+        green_cycle_duration = {intersection_id: len(self.schedule[intersection_id])
+                                for intersection_id in self.schedule}
         car_path = {}
-        car_position = {}
+        next_analysed_time = {}
         for car in city.cars:
-            car_path[car.id] = car.path.copy()
+            car_path[car.id] = deque(car.path)
             street_queue[car_path[car.id][0].id].append(car.id)
-            car_position[car.id] = car_path[car.id][0].length
+            next_analysed_time[car.id] = 0
 
         # run simulation
         score = 0
-        car_ids = [car.id for car in city.cars]
         for current_time in range(city.duration+1):
             crossed_intersections = []
-            for car_id in car_ids:
-                if car_path[car_id] == []:
+            scheduled_removals = []
+            for car_id in car_path:
+                if next_analysed_time[car_id] > current_time:
                     continue
                 street = car_path[car_id][0]
-                if car_position[car_id] < street.length:
-                    car_position[car_id] += 1
-                    if car_position[car_id] == street.length:
-                        if car_path[car_id][1:] == []:
-                            score += city.car_value + city.duration - current_time
-                            car_path[car_id] = []
-                            continue
-                        street_queue[street.id].append(car_id)
-                if car_position[car_id] == street.length and street_queue[street.id][0] == car_id:
-                    intersection_id = city.street_intersection[street.name]
-                    light_is_green = green_lights[intersection_id][current_time % len(
-                        green_lights[intersection_id])] == street.name
-                    if not light_is_green or intersection_id in crossed_intersections:
-                        continue
-                    crossed_intersections.append(intersection_id)
-                    street_queue[street.id] = street_queue[street.id][1:]
-                    car_position[car_id] = 0
-                    car_path[car_id] = car_path[car_id][1:]
+                if street_queue[car_path[car_id][0].id][0] != car_id:
+                    continue
+                intersection_id = city.street_intersection[street.name]
+                light_is_green = self.schedule[intersection_id][current_time %
+                                                                green_cycle_duration[intersection_id]] == street.name
+                if not light_is_green or intersection_id in crossed_intersections:
+                    continue
+                crossed_intersections.append(intersection_id)
+                street_queue[street.id].popleft()
+                car_path[car_id].popleft()
+                next_street = car_path[car_id][0]
+                next_time = current_time + next_street.length
+                if len(car_path[car_id]) == 1:
+                    scheduled_removals.append(car_id)
+                    if next_time <= city.duration:
+                        score += city.car_value + city.duration - next_time
+                else:
+                    street_queue[next_street.id].append(car_id)
+                    next_analysed_time[car_id] = next_time
+            for car_id in scheduled_removals:
+                del car_path[car_id]
+
         return score
 
     def __str__(self):
