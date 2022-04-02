@@ -3,9 +3,9 @@ from model.city import City
 from model.schedule import Schedule
 
 if __name__ == '__main__':
-    city = City.from_input('traffic_signaling/asset/data/d.txt')
+    city = City.from_input('traffic_signaling/asset/data/c.txt')
     print("read city")
-    schedule = Schedule.from_input('traffic_signaling/asset/out/d1.txt')
+    schedule = Schedule.from_input('traffic_signaling/asset/out/c1.txt')
     print("read schedule")
     t1 = time.time()
     print(schedule.evaluate(city))

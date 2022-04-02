@@ -1,4 +1,4 @@
-from time import sleep
+from collections import deque
 from .city import City
 
 
@@ -20,17 +20,18 @@ class Schedule:
             no_streets = int(lines[i+1][0])
             schedule.schedule[intersection_id] = [
                 name for name, duration in lines[i+2:i+2+no_streets] for _ in range(int(duration))]
-            i += no_streets+2
+            i += no_streets + 2
 
         return schedule
 
     def evaluate(self, city: City):
         # setup simulation helpers
-        street_queue = {street_id: [] for street_id in range(city.no_streets)}
+        street_queue = {street_id: deque()
+                        for street_id in range(city.no_streets)}
         car_path = {}
         next_analysed_time = {}
         for car in city.cars:
-            car_path[car.id] = car.path
+            car_path[car.id] = deque(car.path)
             street_queue[car_path[car.id][0].id].append(car.id)
             next_analysed_time[car.id] = 0
 
@@ -51,11 +52,11 @@ class Schedule:
                 if not light_is_green or intersection_id in crossed_intersections:
                     continue
                 crossed_intersections.append(intersection_id)
-                street_queue[street.id] = street_queue[street.id][1:]
-                car_path[car_id] = car_path[car_id][1:]
+                street_queue[street.id].popleft()
+                car_path[car_id].popleft()
                 next_street = car_path[car_id][0]
                 next_time = current_time + next_street.length
-                if car_path[car_id][1:] == []:
+                if len(car_path[car_id]) == 1:
                     scheduled_removals.append(car_id)
                     if next_time <= city.duration:
                         score += city.car_value + city.duration - next_time
