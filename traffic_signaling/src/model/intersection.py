@@ -3,6 +3,11 @@ class Intersection:
         self.id = id
         self.incoming_streets = set()
         self.outgoing_streets = set()
+        self.x, self.y = -1, -1
 
     def __str__(self):
         return str(self.id)
+
+    def set_pos(self, x, y) -> None:
+        self.x = x
+        self.y = y
