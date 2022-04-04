@@ -5,8 +5,8 @@ from controller.city_controller import CityController
 from view.city_viewer import CityViewer
 
 WINDOW_SIZE = (1300, 700)
-BG_COLOR = (255, 255, 255)
-FPS = 1
+BG_COLOR = (200, 200, 200)
+FPS = 5
 
 
 class PygameController:
@@ -28,16 +28,13 @@ class PygameController:
 
     def loop(self) -> None:
         run = True
-        while run and self.bg_color[2] > 10:
+        while run:
 
             start = time.time()
             run = self.is_running()
 
             self.update()
             self.draw()
-
-            self.set_bg_color(
-                self.bg_color[0], self.bg_color[1], self.bg_color[2]-50)
 
             time.sleep(max(1.0/self.fps - (time.time() - start), 0))
 
