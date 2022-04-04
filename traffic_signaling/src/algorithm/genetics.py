@@ -8,7 +8,7 @@ def genetic_algorithm(city: City, number_of_generations: int, population_size: i
 
 def cross_over(city: City, cross_over_point: int, parent_1: Schedule, parent_2: Schedule):
     child_1, child_2 = Schedule(), Schedule()
-    for index, (intersection_id, intersection) in enumerate(city.intersections.items()):
+    for index, (intersection_id, _) in enumerate(city.intersections.items()):
         if intersection_id in parent_1.schedule.keys():
             if index >= cross_over_point:
                 child_2.schedule[intersection_id] = parent_1.schedule[intersection_id]
