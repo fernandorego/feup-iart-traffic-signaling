@@ -1,8 +1,8 @@
+from time import sleep
 import pygame
-import time
 from model.city import City
 from controller.city_controller import CityController
-from view.city_viewer import CityViewer
+from model.schedule import Schedule
 
 WINDOW_SIZE = (1300, 700)
 BG_COLOR = (200, 200, 200)
@@ -10,13 +10,13 @@ FPS = 5
 
 
 class PygameController:
-    def __init__(self, city) -> None:
+    def __init__(self, city: City, schedule: Schedule) -> None:
         self.window_size = WINDOW_SIZE
         self.fps = FPS
         self.bg_color = BG_COLOR
-        self.city_controller = CityController(city, WINDOW_SIZE)
-        self.city_viewer = CityViewer(city)
         self.window = self.init_pygame()
+        self.city_controller = CityController(
+            city, schedule, self.window, WINDOW_SIZE)
         self.main()
 
     def init_pygame(self) -> None:
@@ -26,40 +26,17 @@ class PygameController:
     def quit_pygame(self) -> None:
         pygame.quit()
 
-    def loop(self) -> None:
-        run = True
-        while run:
-
-            start = time.time()
-            run = self.is_running()
-
-            self.update()
-            self.draw()
-
-            time.sleep(max(1.0/self.fps - (time.time() - start), 0))
-
-        pygame.quit()
-
     def is_running(self) -> bool:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return False
-        return True
+                self.quit_pygame()
 
     def set_bg_color(self, r, g, b) -> None:
         self.bg_color = (r, g, b)
 
     def main(self) -> None:
-        self.loop()
-
-        self.quit_pygame()
+        self.city_controller.draw()
+        self.city_controller.evaluate()
 
     def update(self) -> None:
         self.city_controller.update()
-
-    def draw(self) -> None:
-        self.window.fill(self.bg_color)
-
-        self.city_viewer.draw(self.window)
-
-        pygame.display.flip()

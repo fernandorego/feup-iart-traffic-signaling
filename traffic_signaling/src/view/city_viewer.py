@@ -1,5 +1,5 @@
 import pygame
-from math import atan2, degrees, radians, cos, sin, dist
+from math import atan2, ceil, degrees, floor, radians, cos, sin, dist
 from model.city import City
 
 INTERSECTION_COLOR = (85, 156, 173)
@@ -64,8 +64,8 @@ class CityViewer:
                 center=(pos[0], pos[1])))
             window.blit(road_block, rotated_center)
 
-            pos = (pos[0] + BLOCKSIZE*cos(radians(angle)),
-                   pos[1] + BLOCKSIZE*sin(radians(angle)))
+            pos = (pos[0] + round(BLOCKSIZE*cos(radians(angle))),
+                   pos[1] + round(BLOCKSIZE*sin(radians(angle))))
 
     def draw_intersection(self, window, id, intersection, font):
         pygame.draw.circle(window, INTERSECTION_COLOR,

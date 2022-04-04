@@ -6,12 +6,12 @@ from controller.pygame_controller import PygameController
 
 if __name__ == '__main__':
 
+    print("read city and schedule")
     city = City.from_input('../asset/data/a.txt')
-    print("read city")
-    controller = PygameController(city)
+    schedule = Schedule.from_input('../asset/out/a1.txt')
+    controller = PygameController(city, schedule)
+    print("done")
 
-    #schedule = Schedule.from_input('../asset/out/d1.txt')
-    #print("read schedule")
     #t1 = time.time()
     # print(schedule.evaluate(city))
     #t2 = time.time()
