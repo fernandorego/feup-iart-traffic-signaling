@@ -73,9 +73,10 @@ class Schedule:
     def __str__(self):
         s = ""
         for intersection_id in self.schedule:
+            unique_streets = set(self.schedule[intersection_id])
             s += "On intersection " + str(intersection_id) + " the lights are green for " + str(
-                len(self.schedule[intersection_id])) + " incoming streets:\n"
-            for tup in self.schedule[intersection_id]:
-                name, duration = tup
+                len(unique_streets)) + " incoming streets:\n"
+            for name in unique_streets:
+                duration = len([1 for street in self.schedule[intersection_id] if street == name])
                 s += "- " + name + " for " + str(duration) + " seconds\n"
         return s
