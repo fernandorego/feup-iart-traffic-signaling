@@ -14,7 +14,7 @@ class PygameController:
         self.window_size = WINDOW_SIZE
         self.fps = FPS
         self.bg_color = BG_COLOR
-        self.city_controller = CityController(city)
+        self.city_controller = CityController(city, WINDOW_SIZE)
         self.city_viewer = CityViewer(city)
         self.window = self.init_pygame()
         self.main()
