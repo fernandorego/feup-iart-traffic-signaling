@@ -35,8 +35,8 @@ class PygameController:
         self.bg_color = (r, g, b)
 
     def main(self) -> None:
-        self.city_controller.draw()
-        self.city_controller.evaluate()
+        # self.city_controller.draw()
+        self.city_controller.simulate()
 
     def update(self) -> None:
         self.city_controller.update()

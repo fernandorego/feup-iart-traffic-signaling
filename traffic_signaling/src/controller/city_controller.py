@@ -33,7 +33,7 @@ class CityController:
             angle += rotation_angle
         return
 
-    def evaluate(self):
+    def simulate(self):
         # setup simulation helpers
         street_queue = {street_id: deque()
                         for street_id in range(self.city.no_streets)}
@@ -48,26 +48,27 @@ class CityController:
             street_queue[car_path[car.id][0].id].append(car.id)
             next_analysed_time[car.id] = 0
 
-        print()
-        print(self.schedule.schedule)
-        print(self.city.street_intersection)
-        print(street_queue)
-        print(green_cycle_duration)
-        print(car_path)
-        print(next_analysed_time)
-        print()
-
         # run simulation
         score = 0
-        for current_time in range(self.city.duration+1):
+        for current_time in range(self.city.duration + 1):
             crossed_intersections = []
             scheduled_removals = []
+            green_lights_streets = []
+
+            for id, intersection in self.schedule.schedule.items():
+                green_lights_streets.append(
+                    intersection[current_time % green_cycle_duration[id]])
+
+            # {street_id: [street, L]}
+            cars_position = {car_id: [car_path[car_id][0].id, max(next_analysed_time[car_id] - current_time, 0)]
+                             for car_id in car_path}
+            print("TIME=", current_time, "CARS=", cars_position)
+
             for car_id in car_path:
-                # ainda não chegou a interseção
                 if next_analysed_time[car_id] > current_time:
                     continue
                 street = car_path[car_id][0]
-                if street_queue[car_path[car_id][0].id][0] != car_id:  # primeiro carro da fila
+                if street_queue[street.id][0] != car_id:
                     continue
                 intersection_id = self.city.street_intersection[street.name]
                 light_is_green = self.schedule.schedule[intersection_id][current_time %
@@ -78,32 +79,24 @@ class CityController:
                 crossed_intersections.append(intersection_id)
                 street_queue[street.id].popleft()
                 car_path[car_id].popleft()
-                next_street = car_path[car_id][0]
-                next_time = current_time + next_street.length
-                if len(car_path[car_id]) == 1:
+
+                if len(car_path[car_id]) == 0:
                     scheduled_removals.append(car_id)
-                    if next_time <= self.city.duration:
-                        score += self.city.car_value + self.city.duration - next_time
                 else:
+                    next_street = car_path[car_id][0]
+                    next_time = current_time + next_street.length
                     street_queue[next_street.id].append(car_id)
                     next_analysed_time[car_id] = next_time
             for car_id in scheduled_removals:
                 del car_path[car_id]
 
-            print()
-            print(street_queue)
-            print(green_cycle_duration)
-            print(car_path)
-            print(next_analysed_time)
-            print()
+            self.draw(green_lights_streets, cars_position)
 
             sleep(1)
 
-        return score
-
-    def draw(self):
+    def draw(self, green_lights, cars_position):
         self.window.fill(BG_COLOR)
 
-        self.city_viewer.draw(self.window)
+        self.city_viewer.draw(self.window, green_lights, cars_position)
 
         pygame.display.flip()
