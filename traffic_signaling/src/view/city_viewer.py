@@ -1,12 +1,12 @@
 import pygame
-from math import atan2, ceil, degrees, floor, radians, cos, sin, dist
+from math import atan2, degrees, radians, cos, sin, dist
 from model.city import City
 
 INTERSECTION_COLOR = (85, 156, 173)
 TEXT_COLOR = (50, 50, 50)
-BLOCKSIZE = 30
-CAR_LEN = 30
-CAR_WIDTH = 20
+BLOCKSIZE = 40
+CAR_LEN = 40
+CAR_WIDTH = 30
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
@@ -78,11 +78,11 @@ class CityViewer:
 
         while (dist(pos, end_intersect_pos) <= distance):
             distance = dist(pos, end_intersect_pos)
-            if green and distance < 50:
+            if green and distance < 70:
                 rotated_center = (green_block.get_rect(
                     center=(pos[0], pos[1])))
                 window.blit(green_block, rotated_center)
-            elif not green and distance < 60:
+            elif not green and distance < 70:
                 rotated_center = (red_block.get_rect(
                     center=(pos[0], pos[1])))
                 window.blit(red_block, rotated_center)
@@ -99,23 +99,23 @@ class CityViewer:
         start_intersect_pos = self.city.intersections[street[1]].get_pos()
         end_intersect_pos = self.city.intersections[street[2]].get_pos()
 
-        angle = degrees(atan2(end_intersect_pos[1] - start_intersect_pos[1],
-                              end_intersect_pos[0] - start_intersect_pos[0]))
+        angle = atan2(end_intersect_pos[1] - start_intersect_pos[1],
+                      end_intersect_pos[0] - start_intersect_pos[0])
 
         distance = dist(start_intersect_pos, end_intersect_pos) / street[4]
 
         if l == 0:
-            pos = (start_intersect_pos[0] + round(street[4] * distance * cos(radians(angle)) - 1.5 * BLOCKSIZE * cos(radians(angle))),
-                   start_intersect_pos[1] + round(street[4] * distance * sin(radians(angle)) - 1.5 * BLOCKSIZE * sin(radians(angle))))
+            pos = (start_intersect_pos[0] + round(street[4] * distance * cos(angle) - 1.8 * BLOCKSIZE * cos(angle)),
+                   start_intersect_pos[1] + round(street[4] * distance * sin(angle) - 1.8 * BLOCKSIZE * sin(angle)))
         else:
-            pos = (start_intersect_pos[0] + round((street[4] - l) * distance * cos(radians(angle)) - 0.5 * distance * cos(radians(angle))),
-                   start_intersect_pos[1] + round((street[4] - l) * distance * sin(radians(angle)) - 0.5 * distance * sin(radians(angle))))
+            pos = (start_intersect_pos[0] + round((street[4] - l) * distance * cos(angle) - 0.5 * distance * cos(angle)),
+                   start_intersect_pos[1] + round((street[4] - l) * distance * sin(angle) - 0.5 * distance * sin(angle)))
 
         car = pygame.image.load(
             '../asset/img/car.png').convert_alpha()
         car = pygame.transform.scale(
             car, (CAR_LEN, CAR_WIDTH))
-        car = pygame.transform.rotate(car, -angle)
+        car = pygame.transform.rotate(car, -degrees(angle))
 
         rotated_center = (car.get_rect(
             center=(pos[0], pos[1])))
@@ -123,7 +123,7 @@ class CityViewer:
 
     def draw_intersection(self, window, id, intersection, font):
         pygame.draw.circle(window, INTERSECTION_COLOR,
-                           intersection.get_pos(), 35.0)
+                           intersection.get_pos(), 45.0)
         img = font.render(str(id), True, TEXT_COLOR)
         window.blit(img, (intersection.get_pos()[0] - 5,
                           intersection.get_pos()[1] - 7))

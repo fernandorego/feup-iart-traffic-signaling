@@ -4,7 +4,7 @@ from model.city import City
 from controller.city_controller import CityController
 from model.schedule import Schedule
 
-WINDOW_SIZE = (1300, 700)
+WINDOW_SIZE = (1300, 800)
 BG_COLOR = (200, 200, 200)
 FPS = 5
 
