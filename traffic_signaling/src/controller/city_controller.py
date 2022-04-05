@@ -49,6 +49,7 @@ class CityController:
             next_analysed_time[car.id] = 0
 
         print()
+        print(self.schedule.schedule)
         print(self.city.street_intersection)
         print(street_queue)
         print(green_cycle_duration)
