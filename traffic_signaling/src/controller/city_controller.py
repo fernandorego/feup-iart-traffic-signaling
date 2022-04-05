@@ -27,7 +27,7 @@ class CityController:
         angle = 0
         rotation_angle = (2 * math.pi) / intersections_no
         for id, intersection in self.city.intersections.items():
-            intersection.set_pos(center[0] + math.sin(angle)*radius,
+            intersection.set_pos(center[0] + math.sin(angle)*radius*1.3,
                                  center[1] + math.cos(angle)*radius)
 
             angle += rotation_angle

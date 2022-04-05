@@ -5,8 +5,8 @@ from model.city import City
 INTERSECTION_COLOR = (85, 156, 173)
 TEXT_COLOR = (50, 50, 50)
 BLOCKSIZE = 30
-CAR_LEN = 15
-CAR_WIDTH = 10
+CAR_LEN = 30
+CAR_WIDTH = 20
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
