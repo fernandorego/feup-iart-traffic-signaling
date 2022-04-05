@@ -5,15 +5,11 @@ from controller.city_controller import CityController
 from model.schedule import Schedule
 
 WINDOW_SIZE = (1300, 800)
-BG_COLOR = (200, 200, 200)
-FPS = 5
 
 
 class PygameController:
     def __init__(self, city: City, schedule: Schedule) -> None:
         self.window_size = WINDOW_SIZE
-        self.fps = FPS
-        self.bg_color = BG_COLOR
         self.window = self.init_pygame()
         self.city_controller = CityController(
             city, schedule, self.window, WINDOW_SIZE)
@@ -31,11 +27,7 @@ class PygameController:
             if event.type == pygame.QUIT:
                 self.quit_pygame()
 
-    def set_bg_color(self, r, g, b) -> None:
-        self.bg_color = (r, g, b)
-
     def main(self) -> None:
-        # self.city_controller.draw()
         self.city_controller.simulate()
 
     def update(self) -> None:

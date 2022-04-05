@@ -1,13 +1,13 @@
+import pygame
 import math
 from collections import deque
 from time import sleep
-
-import pygame
 from model.city import City
 from model.schedule import Schedule
 from view.city_viewer import CityViewer
 
-BG_COLOR = (200, 200, 200)
+BG_COLOR = (37, 150, 176)
+MARGIN_OFFSET = 50
 
 
 class CityController:
@@ -23,10 +23,10 @@ class CityController:
     def set_intersection_pos(self) -> None:
         intersections_no = len(self.city.intersections)
         center = (self.window_size[0] / 2, self.window_size[1] / 2)
-        radius = self.window_size[1] / 2 - 50
+        radius = self.window_size[1] / 2 - MARGIN_OFFSET
         angle = 0
         rotation_angle = (2 * math.pi) / intersections_no
-        for id, intersection in self.city.intersections.items():
+        for _id, intersection in self.city.intersections.items():
             intersection.set_pos(center[0] + math.sin(angle)*radius,
                                  center[1] + math.cos(angle)*radius)
 
@@ -34,7 +34,6 @@ class CityController:
         return
 
     def simulate(self):
-        # setup simulation helpers
         street_queue = {street_id: deque()
                         for street_id in range(self.city.no_streets)}
 
@@ -48,8 +47,6 @@ class CityController:
             street_queue[car_path[car.id][0].id].append(car.id)
             next_analysed_time[car.id] = 0
 
-        # run simulation
-        score = 0
         for current_time in range(self.city.duration + 1):
             crossed_intersections = []
             scheduled_removals = []
@@ -59,10 +56,8 @@ class CityController:
                 green_lights_streets.append(
                     intersection[current_time % green_cycle_duration[id]])
 
-            # {street_id: [street, L]}
             cars_position = {car_id: [car_path[car_id][0].id, max(next_analysed_time[car_id] - current_time, 0)]
                              for car_id in car_path}
-            print("TIME=", current_time, "CARS=", cars_position)
 
             for car_id in car_path:
                 if next_analysed_time[car_id] > current_time:

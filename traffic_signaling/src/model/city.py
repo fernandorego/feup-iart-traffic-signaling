@@ -7,8 +7,8 @@ class City:
     def __init__(self):
         self.cars = []
         self.streets = []
-        self.intersections = {}  # by intersection_id
-        self.street_intersection = {}  # by street name
+        self.intersections = {}
+        self.street_intersection = {}
         self.no_streets = 0
         self.duration = 0
         self.car_value = 0
@@ -27,7 +27,8 @@ class City:
         city.no_intersections = int(no_intersections)
 
         # add blank intersections
-        city.intersections = {intersection_id: Intersection() for intersection_id in range(int(no_intersections))}
+        city.intersections = {intersection_id: Intersection()
+                              for intersection_id in range(int(no_intersections))}
 
         # connect intersections through streets
         street_by_name = {}  # helper for later exploring cars

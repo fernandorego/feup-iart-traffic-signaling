@@ -2,13 +2,22 @@ import pygame
 from math import atan2, degrees, radians, cos, sin, dist
 from model.city import City
 
-INTERSECTION_COLOR = (85, 156, 173)
+INTERSECTION_COLOR = (194, 146, 74)
+INTERSECTION_SIZE = 45
+FONT_SIZE = 24
 TEXT_COLOR = (50, 50, 50)
 BLOCKSIZE = 40
 CAR_LEN = 40
 CAR_WIDTH = 30
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+LIGHT_OFFSET = 70
+CAR_OFFSET = 1.8
+
+ROAD_IMAGE = '../asset/img/road.png'
+CAR_IMAGE = '../asset/img/car.png'
+GREEN_LIGHT_IMAGE = '../asset/img/green.png'
+RED_LIGHT_IMAGE = '../asset/img/red.png'
 
 
 class CityViewer:
@@ -18,7 +27,6 @@ class CityViewer:
 
     def get_roads(self):
         streets = []
-
         for id1, intersection1 in self.city.intersections.items():
             for outcoming in intersection1.outgoing_streets:
                 st = False
@@ -37,12 +45,12 @@ class CityViewer:
         for street in self.streets:
             green = street[3] in green_lights_streets
             self.draw_road(window, street, green)
-            # if street[0] in cars_position:
+
             for id, info in cars_position.items():
                 if info[0] == street[0]:
                     self.draw_car(window, street, info[1])
 
-        font = pygame.font.SysFont(None, 24)
+        font = pygame.font.SysFont(None, FONT_SIZE)
 
         for id, intersection in self.city.intersections.items():
             self.draw_intersection(window, id, intersection, font)
@@ -54,23 +62,7 @@ class CityViewer:
         angle = degrees(atan2(end_intersect_pos[1] - start_intersect_pos[1],
                               end_intersect_pos[0] - start_intersect_pos[0]))
 
-        green_block = pygame.image.load(
-            '../asset/img/green.png').convert_alpha()
-        green_block = pygame.transform.scale(
-            green_block, (BLOCKSIZE, BLOCKSIZE))
-        green_block = pygame.transform.rotate(green_block, -angle)
-
-        red_block = pygame.image.load(
-            '../asset/img/red.png').convert_alpha()
-        red_block = pygame.transform.scale(
-            red_block, (BLOCKSIZE, BLOCKSIZE))
-        red_block = pygame.transform.rotate(red_block, -angle)
-
-        road_block = pygame.image.load(
-            '../asset/img/road.png').convert_alpha()
-        road_block = pygame.transform.scale(
-            road_block, (BLOCKSIZE, BLOCKSIZE))
-        road_block = pygame.transform.rotate(road_block, -angle)
+        road_block, green_block, red_block = self.load_blocks(angle)
 
         pos = start_intersect_pos
 
@@ -78,11 +70,11 @@ class CityViewer:
 
         while (dist(pos, end_intersect_pos) <= distance):
             distance = dist(pos, end_intersect_pos)
-            if green and distance < 70:
+            if green and distance < LIGHT_OFFSET:
                 rotated_center = (green_block.get_rect(
                     center=(pos[0], pos[1])))
                 window.blit(green_block, rotated_center)
-            elif not green and distance < 70:
+            elif not green and distance < LIGHT_OFFSET:
                 rotated_center = (red_block.get_rect(
                     center=(pos[0], pos[1])))
                 window.blit(red_block, rotated_center)
@@ -95,7 +87,6 @@ class CityViewer:
                    pos[1] + round(BLOCKSIZE*sin(radians(angle))))
 
     def draw_car(self, window, street, l):
-
         start_intersect_pos = self.city.intersections[street[1]].get_pos()
         end_intersect_pos = self.city.intersections[street[2]].get_pos()
 
@@ -105,17 +96,13 @@ class CityViewer:
         distance = dist(start_intersect_pos, end_intersect_pos) / street[4]
 
         if l == 0:
-            pos = (start_intersect_pos[0] + round(street[4] * distance * cos(angle) - 1.8 * BLOCKSIZE * cos(angle)),
-                   start_intersect_pos[1] + round(street[4] * distance * sin(angle) - 1.8 * BLOCKSIZE * sin(angle)))
+            pos = (start_intersect_pos[0] + round(street[4] * distance * cos(angle) - CAR_OFFSET * BLOCKSIZE * cos(angle)),
+                   start_intersect_pos[1] + round(street[4] * distance * sin(angle) - CAR_OFFSET * BLOCKSIZE * sin(angle)))
         else:
             pos = (start_intersect_pos[0] + round((street[4] - l) * distance * cos(angle) - 0.5 * distance * cos(angle)),
                    start_intersect_pos[1] + round((street[4] - l) * distance * sin(angle) - 0.5 * distance * sin(angle)))
 
-        car = pygame.image.load(
-            '../asset/img/car.png').convert_alpha()
-        car = pygame.transform.scale(
-            car, (CAR_LEN, CAR_WIDTH))
-        car = pygame.transform.rotate(car, -degrees(angle))
+        car = self.load_car(angle)
 
         rotated_center = (car.get_rect(
             center=(pos[0], pos[1])))
@@ -123,7 +110,30 @@ class CityViewer:
 
     def draw_intersection(self, window, id, intersection, font):
         pygame.draw.circle(window, INTERSECTION_COLOR,
-                           intersection.get_pos(), 45.0)
+                           intersection.get_pos(), INTERSECTION_SIZE)
         img = font.render(str(id), True, TEXT_COLOR)
-        window.blit(img, (intersection.get_pos()[0] - 5,
-                          intersection.get_pos()[1] - 7))
+        pos = intersection.get_pos()
+        window.blit(img, (pos[0] - 5, pos[1] - 7))
+
+    def load_blocks(self, angle):
+        green_block = pygame.image.load(GREEN_LIGHT_IMAGE).convert_alpha()
+        green_block = pygame.transform.scale(
+            green_block, (BLOCKSIZE, BLOCKSIZE))
+
+        red_block = pygame.image.load(RED_LIGHT_IMAGE).convert_alpha()
+        red_block = pygame.transform.scale(
+            red_block, (BLOCKSIZE, BLOCKSIZE))
+
+        road_block = pygame.image.load(ROAD_IMAGE).convert_alpha()
+        road_block = pygame.transform.scale(
+            road_block, (BLOCKSIZE, BLOCKSIZE))
+
+        return (pygame.transform.rotate(road_block, -angle),
+                pygame.transform.rotate(green_block, -angle),
+                pygame.transform.rotate(red_block, -angle))
+
+    def load_car(self, angle):
+        car = pygame.image.load(CAR_IMAGE).convert_alpha()
+        car = pygame.transform.scale(
+            car, (CAR_LEN, CAR_WIDTH))
+        return pygame.transform.rotate(car, -degrees(angle))
