@@ -2,10 +2,12 @@ import pygame
 from math import atan2, degrees, radians, cos, sin, dist
 from model.city import City
 
-INTERSECTION_COLOR = (194, 146, 74)
+INTERSECTION_COLOR = (255, 196, 77)
 INTERSECTION_SIZE = 45
-FONT_SIZE = 24
-TEXT_COLOR = (50, 50, 50)
+NODES_FONT_SIZE = 25
+FONT_SIZE = 35
+TEXT_COLOR = (240, 240, 240)
+ID_COLOR = (0, 150, 255)
 BLOCKSIZE = 40
 CAR_LEN = 40
 CAR_WIDTH = 30
@@ -50,7 +52,7 @@ class CityViewer:
                 if info[0] == street[0]:
                     self.draw_car(window, street, info[1])
 
-        font = pygame.font.SysFont(None, FONT_SIZE)
+        font = pygame.font.SysFont(None, NODES_FONT_SIZE)
 
         for id, intersection in self.city.intersections.items():
             self.draw_intersection(window, id, intersection, font)
@@ -111,9 +113,43 @@ class CityViewer:
     def draw_intersection(self, window, id, intersection, font):
         pygame.draw.circle(window, INTERSECTION_COLOR,
                            intersection.get_pos(), INTERSECTION_SIZE)
-        img = font.render(str(id), True, TEXT_COLOR)
+        img = font.render(str(id), True, ID_COLOR)
         pos = intersection.get_pos()
         window.blit(img, (pos[0] - 5, pos[1] - 7))
+
+    def draw_infos(self, window, current_time, score):
+        window_width, window_height = window.get_size()
+        font = pygame.font.SysFont(None, FONT_SIZE)
+        self.draw_time(font, window, window_width, current_time)
+        self.draw_streets_info(font, window)
+        self.draw_score(font, window, window_width, window_height, score)
+
+    def draw_time(self, font, window, window_width, current_time):
+        img = font.render("Time Limit = " +
+                          str(self.city.duration), True, TEXT_COLOR)
+        window.blit(img, (window_width - img.get_size()[0] - 50, 40))
+
+        img = font.render("Current Time = " +
+                          str(current_time), True, TEXT_COLOR)
+        window.blit(img, (window_width - img.get_size()[0] - 50, 70))
+
+    def draw_streets_info(self, font, window):
+        img = font.render("Start - End - Name - Time",
+                          True, TEXT_COLOR)
+        window.blit(img, (50, 40))
+
+        height = 100
+        for street in self.streets:
+            img = font.render(str(street[1]) + " - " + str(street[2]) + " - " + street[3] + " - " + str(street[4]),
+                              True, TEXT_COLOR)
+            window.blit(img, (50, height))
+            height += 30
+
+    def draw_score(self, font, window, window_width, window_height, score):
+        img = font.render("Current Score = " +
+                          str(score), True, TEXT_COLOR)
+        window.blit(img, (window_width - img.get_size()[0] - 50,
+                          window_height - img.get_size()[1] - 40))
 
     def load_blocks(self, angle):
         green_block = pygame.image.load(GREEN_LIGHT_IMAGE).convert_alpha()

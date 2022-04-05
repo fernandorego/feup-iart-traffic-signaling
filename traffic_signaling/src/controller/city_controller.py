@@ -6,7 +6,8 @@ from model.city import City
 from model.schedule import Schedule
 from view.city_viewer import CityViewer
 
-BG_COLOR = (37, 150, 176)
+BG_COLOR = (50, 220, 230)
+BG_IMAGE = '../asset/img/grass.jpg'
 MARGIN_OFFSET = 50
 
 
@@ -20,12 +21,12 @@ class CityController:
         self.window_size = window_size
         self.set_intersection_pos()
 
-    def set_schedule(self, schedule):
+    def set_schedule(self, schedule: Schedule):
         self.schedule = schedule
 
     def set_intersection_pos(self) -> None:
         intersections_no = len(self.city.intersections)
-        center = (self.window_size[0] / 2, self.window_size[1] / 2)
+        center = ((self.window_size[0] + 300) / 2, self.window_size[1] / 2)
         radius = self.window_size[1] / 2 - MARGIN_OFFSET
         angle = 0
         rotation_angle = (2 * math.pi) / intersections_no
@@ -54,6 +55,7 @@ class CityController:
             street_queue[car_path[car.id][0].id].append(car.id)
             next_analysed_time[car.id] = 0
 
+        score = 0
         for current_time in range(self.city.duration + 1):
             crossed_intersections = []
             scheduled_removals = []
@@ -84,6 +86,7 @@ class CityController:
 
                 if len(car_path[car_id]) == 0:
                     scheduled_removals.append(car_id)
+                    score += self.city.car_value + self.city.duration - next_time
                 else:
                     next_street = car_path[car_id][0]
                     next_time = current_time + next_street.length
@@ -92,13 +95,17 @@ class CityController:
             for car_id in scheduled_removals:
                 del car_path[car_id]
 
-            self.draw(green_lights_streets, cars_position)
+            self.draw(green_lights_streets, cars_position, current_time, score)
 
             sleep(1)
 
-    def draw(self, green_lights, cars_position):
-        self.window.fill(BG_COLOR)
+    def draw(self, green_lights, cars_position, current_time, score):
+        bg = pygame.transform.scale(
+            pygame.image.load(BG_IMAGE), self.window_size)
+        self.window.blit(bg, (0, 0))
 
         self.city_viewer.draw(self.window, green_lights, cars_position)
+
+        self.city_viewer.draw_infos(self.window, current_time, score)
 
         pygame.display.flip()
