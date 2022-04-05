@@ -8,7 +8,8 @@ if __name__ == '__main__':
 
     city = City.from_input('../asset/data/a.txt')
     schedule = Schedule.from_input('../asset/out/a1.txt')
-    controller = PygameController(city, schedule)
+    controller = PygameController(city)
+    controller.simulate(schedule)
 
     #t1 = time.time()
     # print(schedule.evaluate(city))

@@ -11,14 +11,17 @@ MARGIN_OFFSET = 50
 
 
 class CityController:
-    def __init__(self, city: City, schedule: Schedule, window, window_size) -> None:
+    def __init__(self, city: City, window, window_size) -> None:
         self.city = city
         self.city_viewer = CityViewer(city)
-        self.schedule = schedule
+        self.schedule = None
         self.time = 0
         self.window = window
         self.window_size = window_size
         self.set_intersection_pos()
+
+    def set_schedule(self, schedule):
+        self.schedule = schedule
 
     def set_intersection_pos(self) -> None:
         intersections_no = len(self.city.intersections)
@@ -34,6 +37,10 @@ class CityController:
         return
 
     def simulate(self):
+        if self.schedule == None:
+            print('ERROR: Schedule is missing')
+            return 1
+
         street_queue = {street_id: deque()
                         for street_id in range(self.city.no_streets)}
 
