@@ -1,51 +1,87 @@
 from random import randint, random
+from multiprocessing import Process, Pool
 
 from model.city import City
 from model.schedule import Schedule
-from .common import generate_random_solution
-from collections import deque
+from .common import generate_communist_random_solution, generate_random_solution
 
-# from common import generate_random_solution
+
+def produce_children(city: City, index: int, mutation_chance: float, population: list):
+    best_parent = population[index]
+    random_parent = population[randint(index, len(population) - 1)]
+
+    child_1, child_2 = cross_over(
+        city,
+        randint(0, len(city.intersections) - 1),
+        best_parent,
+        random_parent,
+    )
+
+    if random() <= mutation_chance:
+        child_1 = mutate_intersection(city, child_1)
+    child_1.evaluate(city)
+
+    if random() <= mutation_chance:
+        child_2 = mutate_intersection(city, child_2)
+    child_2.evaluate(city)
+
+    return [child_1, child_2]
 
 
 def genetic_algorithm(
     city: City, number_of_generations: int, population_size: int, mutation_chance: float
 ):
-    print("Generating initial solutions...")
-    population = deque(generate_random_solution(city) for _ in range(population_size))
+    with Pool(processes=int(population_size / 2)) as pool:
+        population = [
+            generate_communist_random_solution(city) for _ in range(population_size)
+        ]
 
-    for _ in range(number_of_generations):
-        print("Creating generation ", _, "...")
-        for couple in range(0, population_size, 2):
-            child_1, child_2 = cross_over(
-                city,
-                randint(0, city.no_intersections - 1),
-                population[couple],
-                population[couple + 1],
-            )
-            if random() <= mutation_chance:
-                population[couple] = mutate_intersection(city, population[couple])
-            if random() <= mutation_chance:
-                population[couple + 1] = mutate_intersection(
-                    city, population[couple + 1]
+        for schedule in population:
+            schedule.evaluate(city)
+
+        population = sorted(
+            population,
+            key=lambda x: x.last_score,
+            reverse=True,
+        )
+
+        for _ in range(number_of_generations):
+            children = []
+            results = [
+                pool.apply_async(
+                    produce_children,
+                    (
+                        city,
+                        index,
+                        mutation_chance,
+                        population,
+                    ),
                 )
+                for index in range(int(len(population) / 4))
+            ]
 
-            if child_1.evaluate(city) > population[0].evaluate(city):
-                population.popleft()
-                population.append(child_1)
-            if child_2.evaluate(city) > population[0].evaluate(city):
-                population.popleft()
-                population.append(child_2)
+            children = [result.get() for result in results]
 
-    print([x.evaluate(city) for x in population])
-    return population[0]
+            for child in children:
+                population.extend(child)
+
+            population = sorted(population, key=lambda x: x.last_score, reverse=True)
+            population = population[:population_size]
+
+            print(
+                f"Generation {_ + 1} scored an average of {sum([x.last_score for x in population]) / len(population)}"
+            )
+            print(population[0].last_score, population[1].last_score)
+
+    print(population[0].last_score, population[1].last_score)
+    return 0
 
 
 def cross_over(
     city: City, cross_over_point: int, parent_1: Schedule, parent_2: Schedule
 ):
     child_1, child_2 = Schedule(), Schedule()
-    for index, (intersection_id, _) in enumerate(city.intersections.items()):
+    for index, intersection_id in enumerate(city.intersections.keys()):
         if intersection_id in parent_1.schedule.keys():
             if index >= cross_over_point:
                 child_2.schedule[intersection_id] = parent_1.schedule[intersection_id]
