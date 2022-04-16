@@ -1,80 +1,219 @@
 from random import randint, random
-from multiprocessing import Process, Pool
+from multiprocessing import Process, Queue, Manager
+from math import ceil
+from toolz import unique
+
+import os
 
 from model.city import City
 from model.schedule import Schedule
-from .common import generate_communist_random_solution, generate_random_solution
+from .common import (
+    generate_random_solution,
+    distributed_sum_permutation,
+    random_sum_permutation,
+)
 
 
-def produce_children(city: City, index: int, mutation_chance: float, population: list):
-    best_parent = population[index]
-    random_parent = population[randint(index, len(population) - 1)]
+def genetic_algorithm_process(
+    city: City,
+    number_of_generations: int,
+    population_size: int,
+    mutation_chance: float,
+    result: Queue,
+):
 
-    child_1, child_2 = cross_over(
-        city,
-        randint(0, len(city.intersections) - 1),
-        best_parent,
-        random_parent,
-    )
+    population = [
+        generate_random_solution(city, distributed_sum_permutation)
+        for _ in range(population_size)
+    ]
 
-    if random() <= mutation_chance:
-        child_1 = mutate_intersection(city, child_1)
-    child_1.evaluate(city)
+    print(f"Starting process {os.getpid()} with a population of size {population_size}")
 
-    if random() <= mutation_chance:
-        child_2 = mutate_intersection(city, child_2)
-    child_2.evaluate(city)
+    genetic_map = {}
+    for schedule in population:
+        schedule.evaluate(city)
+        genetic_map = genetic_mapping(schedule, genetic_map)
 
-    return [child_1, child_2]
+    for _ in range(number_of_generations):
+        for schedule in population:
+            if random() <= mutation_chance:
+                schedule = mutate_intersection(city, schedule)
+                schedule.evaluate(city)
+
+        for index in range(int(population_size / 4)):
+            best_parent = population[index]
+            second_parent_index = index
+            while second_parent_index == index:
+                second_parent_index = randint(0, population_size - 1)
+
+            random_parent = population[second_parent_index]
+
+            child_1, child_2 = cross_over(
+                city,
+                randint(0, len(city.intersections) - 1),
+                best_parent,
+                random_parent,
+            )
+
+            child_1.evaluate(city)
+            child_2.evaluate(city)
+            population.append(child_1)
+            population.append(child_2)
+
+        population.sort(
+            key=lambda x: x.last_score
+            + genetic_evaluation(x, genetic_map, city.car_value),
+            reverse=True,
+        )
+        population = population[: population_size + 1]
+
+        genetic_map = {}
+        for schedule in population:
+            genetic_map = genetic_mapping(schedule, genetic_map)
+
+        print(
+            f"Process {os.getpid()} at iteration {_ + 1} scored an average of {sum([x.last_score for x in population]) / len(population)}"
+        )
+
+    print([x.last_score for x in population])
+
+    result.put(population)
+    return None
 
 
 def genetic_algorithm(
-    city: City, number_of_generations: int, population_size: int, mutation_chance: float
+    city: City,
+    number_of_generations: int,
+    population_size: int,
+    subpopulation_size: int,
+    mutation_chance: float,
 ):
-    with Pool(processes=int(population_size / 2)) as pool:
-        population = [
-            generate_communist_random_solution(city) for _ in range(population_size)
-        ]
+    population = []
+    processes = []
+    result = Manager().Queue()
+    remaining = population_size
+    subpopulation = subpopulation_size
 
+    for _ in range(ceil(population_size / subpopulation_size)):
+        if remaining < subpopulation_size:
+            subpopulation = remaining
+        processes.append(
+            Process(
+                target=genetic_algorithm_process,
+                args=(
+                    city,
+                    number_of_generations,
+                    subpopulation,
+                    mutation_chance,
+                    result,
+                ),
+            )
+        )
+
+        remaining -= subpopulation_size
+
+    for process in processes:
+        process.start()
+
+    for process in processes:
+        process.join()
+
+    for _ in processes:
+        population.extend(result.get())
+
+    genetic_map = {}
+    for schedule in population:
+        genetic_map = genetic_mapping(schedule, genetic_map)
+
+    population = list(unique(population, key=lambda x: x.last_score))
+    population.sort(
+        key=lambda x: x.last_score + genetic_evaluation(x, genetic_map, city.car_value),
+        reverse=True,
+    )
+
+    print()
+    print("### Final Population Scores ###")
+    print([x.last_score for x in population])
+    print()
+
+    for _ in range(number_of_generations):
         for schedule in population:
-            schedule.evaluate(city)
+            if random() <= mutation_chance:
+                schedule = mutate_intersection(city, schedule)
+                schedule.evaluate(city)
 
-        population = sorted(
-            population,
+        for index in range(int(population_size / 4)):
+            best_parent = population[index]
+            second_parent_index = index
+            while second_parent_index == index:
+                second_parent_index = randint(0, population_size - 1)
+
+            random_parent = population[second_parent_index]
+
+            child_1, child_2 = cross_over(
+                city,
+                randint(0, len(city.intersections) - 1),
+                best_parent,
+                random_parent,
+            )
+
+            child_1.evaluate(city)
+            child_2.evaluate(city)
+            population.append(child_1)
+            population.append(child_2)
+
+        population.sort(
             key=lambda x: x.last_score,
             reverse=True,
         )
+        population = population[: population_size + 1]
 
-        for _ in range(number_of_generations):
-            children = []
-            results = [
-                pool.apply_async(
-                    produce_children,
-                    (
-                        city,
-                        index,
-                        mutation_chance,
-                        population,
-                    ),
-                )
-                for index in range(int(len(population) / 4))
-            ]
+        print(
+            f"Generation {_ + 1} scored an average of {sum([x.last_score for x in population]) / len(population)}"
+        )
 
-            children = [result.get() for result in results]
+    print([x.last_score for x in population])
+    return None
 
-            for child in children:
-                population.extend(child)
 
-            population = sorted(population, key=lambda x: x.last_score, reverse=True)
-            population = population[:population_size]
+def genetic_evaluation(schedule: Schedule, genetic_mapping: dict, car_bonus: int):
+    score = 0
 
-            print(
-                f"Generation {_ + 1} scored an average of {sum([x.last_score for x in population]) / len(population)}"
-            )
-            print(population[0].last_score, population[1].last_score)
+    for intersection_id, intersection_schedule in schedule.schedule.items():
+        if not (intersection_id in genetic_mapping.keys()):
+            score += car_bonus * 2
+            continue
+        streets = set(intersection_schedule)
+        for street in streets:
+            if not (street in genetic_mapping[intersection_id].keys()):
+                score += car_bonus * 2
+                continue
+            street_time = intersection_schedule.count(street)
 
-    print(population[0].last_score, population[1].last_score)
-    return 0
+            if not (street_time in genetic_mapping[intersection_id][street].keys()):
+                score += car_bonus * 2
+                continue
+            elif genetic_mapping[intersection_id][street][street_time] == min(
+                genetic_mapping[intersection_id][street].values()
+            ):
+                score += car_bonus
+    return score
+
+
+def genetic_mapping(schedule: Schedule, mapping: dict):
+    for intersection_id, intersection_schedule in schedule.schedule.items():
+        if not (intersection_id in mapping.keys()):
+            mapping[intersection_id] = {}
+        streets = set(intersection_schedule)
+        for street in streets:
+            if not (street in mapping[intersection_id].keys()):
+                mapping[intersection_id][street] = {}
+            street_time = intersection_schedule.count(street)
+            if not (street_time in mapping[intersection_id][street].keys()):
+                mapping[intersection_id][street][street_time] = 1
+            else:
+                mapping[intersection_id][street][street_time] += 1
+    return mapping
 
 
 def cross_over(
