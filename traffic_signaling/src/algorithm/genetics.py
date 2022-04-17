@@ -242,23 +242,13 @@ def mutate_intersection(city: City, schedule: Schedule):
         randint(0, len(intersections) - 1)
     ]
 
-    intersection_remaining_time = city.duration
-    intersection_has_schedule = False
+    intersection_schedule = distributed_sum_permutation(
+        len(intersection.incoming_streets), city.duration
+    )
+    schedule.schedule[intersection_id] = []
 
-    for street in intersection.incoming_streets:
-        street_green_light_time = randint(0, intersection_remaining_time)
-
-        if street_green_light_time > 0:
-
-            if not (intersection_has_schedule):
-                schedule.schedule[intersection_id] = []
-                intersection_has_schedule = True
-
-            intersection_remaining_time -= street_green_light_time
-            schedule.schedule[intersection_id] += [
-                street.name for _ in range(street_green_light_time)
-            ]
-
-        if intersection_remaining_time == 0:
-            break
+    for index, street in enumerate(intersection.incoming_streets):
+        schedule.schedule[intersection_id] += [
+            street.name for _ in range(intersection_schedule[index])
+        ]
     return schedule
