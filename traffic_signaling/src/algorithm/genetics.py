@@ -236,7 +236,7 @@ def cross_over(
     return [child_1, child_2]
 
 
-def mutate_intersection(city: City, schedule: Schedule):
+def mutate_random_intersection(city: City, schedule: Schedule):
     intersections = list(enumerate(city.intersections.items()))
     _, (intersection_id, intersection) = intersections[
         randint(0, len(intersections) - 1)
