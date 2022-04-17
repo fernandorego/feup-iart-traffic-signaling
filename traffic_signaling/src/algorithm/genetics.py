@@ -274,7 +274,6 @@ def mutate_single_street(city: City, schedule: Schedule):
         sum(list(current_intersection_schedule_dict.values())) - street_time
     )
 
-    print(current_intersection_schedule_dict, street, remaining_time)
     current_intersection_schedule_dict[street] = randint(0, remaining_time)
 
     schedule.schedule[intersection_id] = [
