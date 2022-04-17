@@ -139,7 +139,7 @@ def genetic_algorithm(
     for _ in range(number_of_generations):
         for schedule in population:
             if random() <= mutation_chance:
-                schedule = mutate_intersection(city, schedule)
+                schedule = mutate_random_intersection(city, schedule)
                 schedule.evaluate(city)
 
         for index in range(int(population_size / 4)):
