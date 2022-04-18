@@ -10,7 +10,7 @@ from model.schedule import Schedule
 from .common import (
     generate_random_solution,
     distributed_sum_permutation,
-    random_sum_permutation,
+    mutate_intersection,
 )
 
 
@@ -27,7 +27,8 @@ def genetic_algorithm_process(
         for _ in range(population_size)
     ]
 
-    print(f"Starting process {os.getpid()} with a population of size {population_size}")
+    print(
+        f"Starting process {os.getpid()} with a population of size {population_size}")
 
     genetic_map = {}
     for schedule in population:
@@ -37,7 +38,7 @@ def genetic_algorithm_process(
     for _ in range(number_of_generations):
         for schedule in population:
             if random() <= mutation_chance:
-                schedule = mutate_intersection(city, schedule)
+                schedule, __ = mutate_intersection(city, schedule)
                 schedule.evaluate(city)
 
         for index in range(int(population_size / 4)):
@@ -127,7 +128,8 @@ def genetic_algorithm(
 
     population = list(unique(population, key=lambda x: x.last_score))
     population.sort(
-        key=lambda x: x.last_score + genetic_evaluation(x, genetic_map, city.car_value),
+        key=lambda x: x.last_score +
+        genetic_evaluation(x, genetic_map, city.car_value),
         reverse=True,
     )
 
@@ -139,7 +141,7 @@ def genetic_algorithm(
     for _ in range(number_of_generations):
         for schedule in population:
             if random() <= mutation_chance:
-                schedule = mutate_intersection(city, schedule)
+                schedule, __ = mutate_intersection(city, schedule)
                 schedule.evaluate(city)
 
         for index in range(int(population_size / 4)):
@@ -234,31 +236,3 @@ def cross_over(
                 child_2.schedule[intersection_id] = parent_2.schedule[intersection_id]
 
     return [child_1, child_2]
-
-
-def mutate_intersection(city: City, schedule: Schedule):
-    intersections = list(enumerate(city.intersections.items()))
-    _, (intersection_id, intersection) = intersections[
-        randint(0, len(intersections) - 1)
-    ]
-
-    intersection_remaining_time = city.duration
-    intersection_has_schedule = False
-
-    for street in intersection.incoming_streets:
-        street_green_light_time = randint(0, intersection_remaining_time)
-
-        if street_green_light_time > 0:
-
-            if not (intersection_has_schedule):
-                schedule.schedule[intersection_id] = []
-                intersection_has_schedule = True
-
-            intersection_remaining_time -= street_green_light_time
-            schedule.schedule[intersection_id] += [
-                street.name for _ in range(street_green_light_time)
-            ]
-
-        if intersection_remaining_time == 0:
-            break
-    return schedule
