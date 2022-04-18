@@ -41,3 +41,31 @@ def distributed_sum_permutation(length: int, perm_sum: int):
         perm_sum -= temp
         permutation[randint(0, length - 1)] += temp
     return permutation
+
+
+def mutate_intersection(city: City, schedule: Schedule):
+    intersections = list(enumerate(city.intersections.items()))
+    _, (intersection_id, intersection) = intersections[
+        randint(0, len(intersections) - 1)
+    ]
+
+    intersection_remaining_time = city.duration
+    intersection_has_schedule = False
+
+    for street in intersection.incoming_streets:
+        street_green_light_time = randint(0, intersection_remaining_time)
+
+        if street_green_light_time > 0:
+
+            if not (intersection_has_schedule):
+                schedule.schedule[intersection_id] = []
+                intersection_has_schedule = True
+
+            intersection_remaining_time -= street_green_light_time
+            schedule.schedule[intersection_id] += [
+                street.name for _ in range(street_green_light_time)
+            ]
+
+        if intersection_remaining_time == 0:
+            break
+    return (schedule, intersection)

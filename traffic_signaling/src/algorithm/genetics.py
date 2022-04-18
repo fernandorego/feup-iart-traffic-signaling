@@ -10,7 +10,7 @@ from model.schedule import Schedule
 from .common import (
     generate_random_solution,
     distributed_sum_permutation,
-    random_sum_permutation,
+    mutate_intersection,
 )
 
 
