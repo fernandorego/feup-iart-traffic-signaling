@@ -32,7 +32,7 @@ def genetic_algorithm_process(
     genetic_map = {}
     for schedule in population:
         schedule.evaluate(city)
-        genetic_map = genetic_mapping(schedule, genetic_map)
+        genetic_map = chromossome_mapping(schedule, genetic_map)
 
     for generation in range(1, number_of_generations + 1):
         population = next_generation(
@@ -50,7 +50,7 @@ def genetic_algorithm_process(
 
         genetic_map = {}
         for schedule in population:
-            genetic_map = genetic_mapping(schedule, genetic_map)
+            genetic_map = chromossome_mapping(schedule, genetic_map)
 
         print(
             f"Process {os.getpid()} at generation {generation} scored an average of {sum([x.last_score for x in population]) / len(population)}"
