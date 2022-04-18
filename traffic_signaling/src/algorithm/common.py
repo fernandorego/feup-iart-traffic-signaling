@@ -1,5 +1,5 @@
-from ..model.city import City
-from ..model.schedule import Schedule
+from model.city import City
+from model.schedule import Schedule
 from random import randint
 
 

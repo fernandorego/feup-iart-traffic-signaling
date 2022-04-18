@@ -1,7 +1,7 @@
 from random import randint, random
-from traffic_signaling.src.algorithm.common import distributed_sum_permutation, generate_random_solution, mutate_intersection
-from traffic_signaling.src.model.city import City
-from traffic_signaling.src.model.schedule import Schedule
+from algorithm.common import distributed_sum_permutation, generate_random_solution, mutate_intersection
+from model.city import City
+from model.schedule import Schedule
 
 
 def iterated_local_search(city: City, number_of_iterations: int, number_of_mutations_per_iteration: int):

@@ -1,8 +1,8 @@
 from random import random, seed
 import time
 from model.city import City
-from algorithm.taboo import taboo_search
 from algorithm.local_search import iterated_local_search
+from algorithm.taboo import taboo_search
 
 if __name__ == "__main__":
     seed()
