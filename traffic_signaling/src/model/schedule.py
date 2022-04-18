@@ -28,6 +28,18 @@ class Schedule:
 
         return schedule
 
+    def write_to_file(self, path, file_name):
+        f = open(path + "/" + file_name, "w")
+        f.write(str(len(self.schedule)) + "\n")
+        for intersection_id in self.schedule:
+            green_cycle = self.schedule[intersection_id]
+            green_cycle_set = set(green_cycle)
+            unique_streets = len(green_cycle_set)
+            f.write(str(intersection_id) + "\n" + str(unique_streets) + "\n")
+            for street in green_cycle_set:
+                f.write(street + " " + str(green_cycle.count(street)) + "\n")
+        f.close()
+
     def evaluate(self, city: City):
         # setup simulation helpers
         street_queue = {street_id: deque()

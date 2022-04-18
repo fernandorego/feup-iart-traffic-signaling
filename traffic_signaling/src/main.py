@@ -7,7 +7,8 @@ from algorithm.taboo import taboo_search
 if __name__ == "__main__":
     seed()
     city = City.from_input("traffic_signaling/asset/data/e.txt")
-    print(iterated_local_search(city, 50, 5))
+    schedule = iterated_local_search(city, 100, 2)
+    schedule[0].write_to_file(".", "my_solution")
     #genetic_algorithm(city, 50, 150, 30, 0.05)
     # print("read city")
     # schedule = Schedule.from_input('traffic_signaling/asset/out/d1.txt')
