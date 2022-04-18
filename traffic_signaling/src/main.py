@@ -9,7 +9,7 @@ if __name__ == "__main__":
     seed()
     city = City.from_input("traffic_signaling/asset/data/e.txt")
     # genetic_algorithm(city, 50, 200, 40, 0.05)
-    schedule = simulated_annealing(city)
+    schedule = simulated_annealing(city, 100)
     # print("read city")
     # schedule = Schedule.from_input('traffic_signaling/asset/out/d1.txt')
     # print("read schedule")
