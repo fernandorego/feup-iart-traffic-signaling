@@ -1,6 +1,5 @@
-from model.city import City
-from model.schedule import Schedule
-from model.intersection import Intersection
+from ..model.city import City
+from ..model.schedule import Schedule
 from random import randint
 
 
@@ -43,7 +42,7 @@ def distributed_sum_permutation(length: int, perm_sum: int):
     return permutation
 
 
-def mutate_intersection(city: City, schedule: Schedule):
+def mutate_intersection(city: City, schedule: Schedule) -> tuple[Schedule, int]:
     intersections = list(enumerate(city.intersections.items()))
     _, (intersection_id, intersection) = intersections[
         randint(0, len(intersections) - 1)
@@ -65,7 +64,7 @@ def mutate_intersection(city: City, schedule: Schedule):
             schedule.schedule[intersection_id] += [
                 street.name for _ in range(street_green_light_time)
             ]
-
         if intersection_remaining_time == 0:
             break
+
     return (schedule, intersection)
