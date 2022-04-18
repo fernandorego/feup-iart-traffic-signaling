@@ -21,7 +21,7 @@ class Schedule:
             no_streets = int(lines[i + 1][0])
             schedule.schedule[intersection_id] = [
                 name
-                for name, duration in lines[i + 2 : i + 2 + no_streets]
+                for name, duration in lines[i + 2: i + 2 + no_streets]
                 for _ in range(int(duration))
             ]
             i += no_streets + 2
@@ -30,11 +30,14 @@ class Schedule:
 
     def evaluate(self, city: City):
         # setup simulation helpers
-        street_queue = {street_id: deque() for street_id in range(city.no_streets)}
-        green_cycle_duration = {
-            intersection_id: len(self.schedule[intersection_id])
-            for intersection_id in self.schedule
-        }
+        street_queue = {street_id: deque()
+                        for street_id in range(city.no_streets)}
+        green_cycle_duration, last_crossed = {}, {}
+        for intersection_id in self.schedule:
+            green_cycle_duration[intersection_id] = len(
+                self.schedule[intersection_id])
+            last_crossed[intersection_id] = -1
+
         car_path = {}
         next_analysed_time = {}
         for car in city.cars:
@@ -45,7 +48,6 @@ class Schedule:
         # run simulation
         score = 0
         for current_time in range(city.duration + 1):
-            crossed_intersections = []
             scheduled_removals = []
             for car_id in car_path:
                 if next_analysed_time[car_id] > current_time:
@@ -62,9 +64,9 @@ class Schedule:
                     ]
                     == street.name
                 )
-                if not light_is_green or intersection_id in crossed_intersections:
+                if not light_is_green or last_crossed[intersection_id] == current_time:
                     continue
-                crossed_intersections.append(intersection_id)
+                last_crossed[intersection_id] = current_time
                 street_queue[street.id].popleft()
                 car_path[car_id].popleft()
                 next_street = car_path[car_id][0]

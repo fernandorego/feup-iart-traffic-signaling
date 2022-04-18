@@ -1,6 +1,6 @@
 from model.city import City
 from model.schedule import Schedule
-from random import randint
+from random import randint, random
 
 
 def generate_random_solution(city: City, schedule_generator):
@@ -68,3 +68,20 @@ def mutate_intersection(city: City, schedule: Schedule) -> tuple[Schedule, int]:
             break
 
     return (schedule, intersection)
+
+
+def mutate_schedule(city, schedule, strength):
+    another_solution = generate_random_solution(
+        city, distributed_sum_permutation)
+    return mix_solutions(city, schedule, another_solution, strength)
+
+
+def mix_solutions(city, base_schedule, foreigner_schedule, probability):
+    perturbation = Schedule()
+    for j in range(city.no_intersections):
+        r = random()
+        if r < probability:
+            perturbation.schedule[j] = foreigner_schedule.schedule[j]
+        else:
+            perturbation.schedule[j] = base_schedule.schedule[j]
+    return perturbation
