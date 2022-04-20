@@ -86,7 +86,7 @@ def mutate_single_street(city: City, schedule: Schedule):
     elif len(streets) == 1:
         street, street_time = streets[0]
     else:
-        streets = list(city.intersections[intersection_id])
+        streets = list(city.intersections[intersection_id].incoming_streets)
         street, street_time = streets[randint(0, len(streets) - 1)], 0
 
     remaining_time = city.duration - (
