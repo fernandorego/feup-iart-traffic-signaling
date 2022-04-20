@@ -27,7 +27,8 @@ class City:
         city.no_intersections = int(no_intersections)
 
         # add blank intersections
-        city.intersections = {intersection_id: Intersection() for intersection_id in range(int(no_intersections))}
+        city.intersections = {intersection_id: Intersection(
+            intersection_id) for intersection_id in range(int(no_intersections))}
 
         # connect intersections through streets
         street_by_name = {}  # helper for later exploring cars
