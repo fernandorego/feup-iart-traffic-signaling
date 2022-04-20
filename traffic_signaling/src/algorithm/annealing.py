@@ -27,5 +27,5 @@ def simulated_annealing(city: City, number_of_iterations: int):
         
         
 
-def scheduling_function(t: float, T0=1000):
+def scheduling_function(t: float, T0=3000):
     return T0 / (1 + log(1 + t))
