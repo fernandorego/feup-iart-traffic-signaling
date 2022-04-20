@@ -29,6 +29,13 @@ class MainController:
         self.ils_params = ["Number of Iterations",
                            "Number of Mutations per Interation"]
 
+        self.cities = ["City A - 4 intersections",
+                       "City B - 7073 intersections",
+                       "City C - 10000 intersections",
+                       "City D - 8000 intersections",
+                       "City E - 500 intersections",
+                       "City F - 1662 intersections"]
+
     def main_loop(self):
         # seed()
         # city = City.from_input("traffic_signaling/asset/data/e.txt")
@@ -53,26 +60,27 @@ class MainController:
                     params = self.get_params(self.genetic_params)
                     if params == []:
                         continue
-
-                    # genetic_algorithm(city=0, number_of_generations=0, population_size = 0, subpopulation_size = 0, mutation_chance = 0)
+                    city = self.get_city()
+                    genetic_algorithm(city, params[0], params[1],
+                                      params[2], params[3])
                 case 2:
                     params = self.get_params(self.tabu_params)
                     if params == []:
                         continue
-
-                    # taboo_search(city=0,number_of_iterations=0,number_of_mutations_per_iteration=0,max_worse_jump_percentage=0)
+                    city = self.get_city()
+                    taboo_search(city, params[0], params[1], params[2])
                 case 3:
                     params = self.get_params(self.annealing_params)
                     if params == []:
                         continue
-
-                    # annealing
+                    city = self.get_city()
+                    # simulated_annealing(city, params[0])
                 case 4:
                     params = self.get_params(self.ils_params)
                     if params == []:
                         continue
-
-                    # iterated_local_search(city=0,number_of_iterations=0,number_of_mutations_per_iteration=0)
+                    city = self.get_city()
+                    iterated_local_search(city, params[0], params[1])
                 case 5:
                     # city = City.from_input("traffic_signaling/asset/data/e.txt")
                     # schedule = genetic_algorithm(city, 50, 300, 50, 0.05)
@@ -98,10 +106,32 @@ class MainController:
                     params.append(param)
                     break
                 print("Invalid Number")
-        return 0
+        return params
 
     def get_city(self):
-        return 0
+        print()
+        for i in range(len(self.cities)):
+            print(i+1, "-", self.cities[i])
+
+        err = False
+
+        while 1:
+            if not err:
+                err = False
+
+            option = self.get_option("Enter an option: ")
+
+            match option:
+                case 0: return None
+                case 1: return City.from_input("traffic_signaling/asset/data/a.txt")
+                case 2: return City.from_input("traffic_signaling/asset/data/b.txt")
+                case 3: return City.from_input("traffic_signaling/asset/data/c.txt")
+                case 4: return City.from_input("traffic_signaling/asset/data/d.txt")
+                case 5: return City.from_input("traffic_signaling/asset/data/e.txt")
+                case 6: return City.from_input("traffic_signaling/asset/data/f.txt")
+                case _:
+                    print("Input option not valid")
+                    err = True
 
     def get_option(self, msg):
         try:
