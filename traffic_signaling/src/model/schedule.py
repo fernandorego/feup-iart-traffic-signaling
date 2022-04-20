@@ -70,12 +70,15 @@ class Schedule:
                 intersection_id = city.street_intersection[street.name]
                 if not (intersection_id in self.schedule.keys()):
                     continue
-                light_is_green = (
-                    self.schedule[intersection_id][
-                        current_time % green_cycle_duration[intersection_id]
-                    ]
-                    == street.name
-                )
+                if green_cycle_duration[intersection_id] == 0:
+                    light_is_green = False
+                else:
+                    light_is_green = (
+                        self.schedule[intersection_id][
+                            current_time % green_cycle_duration[intersection_id]
+                        ]
+                        == street.name
+                    )
                 if not light_is_green or last_crossed[intersection_id] == current_time:
                     continue
                 last_crossed[intersection_id] = current_time

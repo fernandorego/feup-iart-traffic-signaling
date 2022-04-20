@@ -27,53 +27,33 @@ def genetic_algorithm_process(
         for _ in range(population_size)
     ]
 
-    print(
-        f"Starting process {os.getpid()} with a population of size {population_size}")
+    print(f"Starting process {os.getpid()} with a population of size {population_size}")
 
     genetic_map = {}
     for schedule in population:
         schedule.evaluate(city)
-        genetic_map = genetic_mapping(schedule, genetic_map)
+        genetic_map = chromossome_mapping(schedule, genetic_map)
 
-    for _ in range(number_of_generations):
-        for schedule in population:
-            if random() <= mutation_chance:
-                schedule, __ = mutate_intersection(city, schedule)
-                schedule.evaluate(city)
-
-        for index in range(int(population_size / 4)):
-            best_parent = population[index]
-            second_parent_index = index
-            while second_parent_index == index:
-                second_parent_index = randint(0, population_size - 1)
-
-            random_parent = population[second_parent_index]
-
-            child_1, child_2 = cross_over(
-                city,
-                randint(0, len(city.intersections) - 1),
-                best_parent,
-                random_parent,
-            )
-
-            child_1.evaluate(city)
-            child_2.evaluate(city)
-            population.append(child_1)
-            population.append(child_2)
-
-        population.sort(
-            key=lambda x: x.last_score
-            + genetic_evaluation(x, genetic_map, city.car_value),
-            reverse=True,
+    for generation in range(1, number_of_generations + 1):
+        population = next_generation(
+            city,
+            population,
+            population_size,
+            mutate_single_street,
+            cross_over,
+            (
+                lambda x: x.last_score
+                + genetic_evaluation(x, genetic_map, city.car_value)
+            ),
+            mutation_chance,
         )
-        population = population[: population_size + 1]
 
         genetic_map = {}
         for schedule in population:
-            genetic_map = genetic_mapping(schedule, genetic_map)
+            genetic_map = chromossome_mapping(schedule, genetic_map)
 
         print(
-            f"Process {os.getpid()} at iteration {_ + 1} scored an average of {sum([x.last_score for x in population]) / len(population)}"
+            f"Process {os.getpid()} at generation {generation} scored an average of {sum([x.last_score for x in population]) / len(population)}"
         )
 
     print([x.last_score for x in population])
@@ -122,87 +102,109 @@ def genetic_algorithm(
     for _ in processes:
         population.extend(result.get())
 
-    genetic_map = {}
+    chromossome_map = {}
     for schedule in population:
-        genetic_map = genetic_mapping(schedule, genetic_map)
+        chromossome_map = chromossome_mapping(schedule, chromossome_map)
 
     population = list(unique(population, key=lambda x: x.last_score))
     population.sort(
-        key=lambda x: x.last_score +
-        genetic_evaluation(x, genetic_map, city.car_value),
+        key=lambda x: x.last_score
+        + genetic_evaluation(x, chromossome_map, city.car_value),
         reverse=True,
     )
 
     print()
-    print("### Final Population Scores ###")
+    print("### Merged Population Scores ###")
     print([x.last_score for x in population])
     print()
 
-    for _ in range(number_of_generations):
-        for schedule in population:
-            if random() <= mutation_chance:
-                schedule, __ = mutate_intersection(city, schedule)
-                schedule.evaluate(city)
-
-        for index in range(int(population_size / 4)):
-            best_parent = population[index]
-            second_parent_index = index
-            while second_parent_index == index:
-                second_parent_index = randint(0, population_size - 1)
-
-            random_parent = population[second_parent_index]
-
-            child_1, child_2 = cross_over(
-                city,
-                randint(0, len(city.intersections) - 1),
-                best_parent,
-                random_parent,
-            )
-
-            child_1.evaluate(city)
-            child_2.evaluate(city)
-            population.append(child_1)
-            population.append(child_2)
-
-        population.sort(
-            key=lambda x: x.last_score,
-            reverse=True,
+    for generation in range(1, number_of_generations + 1):
+        population = next_generation(
+            city,
+            population,
+            population_size,
+            mutate_single_street,
+            cross_over,
+            (lambda x: x.last_score),
+            mutation_chance,
         )
-        population = population[: population_size + 1]
 
         print(
-            f"Generation {_ + 1} scored an average of {sum([x.last_score for x in population]) / len(population)}"
+            f"Generation {generation} scored an average of {sum([x.last_score for x in population]) / len(population)}"
         )
 
-    print([x.last_score for x in population])
-    return None
+    print(f"Final population: {[x.last_score for x in population]}")
+    return population
 
 
-def genetic_evaluation(schedule: Schedule, genetic_mapping: dict, car_bonus: int):
+def next_generation(
+    city: City,
+    population: list,
+    population_size: int,
+    mutation_operator,
+    cross_over_function,
+    sorting_function,
+    mutation_chance: float,
+):
+    for schedule in population:
+        if random() <= mutation_chance:
+            schedule = mutation_operator(city, schedule)
+            schedule.evaluate(city)
+
+    for index in range(int(len(population) / 4)):
+        best_parent = population[index]
+        second_parent_index = index
+        while second_parent_index == index:
+            second_parent_index = randint(0, len(population) - 1)
+
+        random_parent = population[second_parent_index]
+
+        child_1, child_2 = cross_over_function(
+            city,
+            randint(0, len(city.intersections) - 1),
+            best_parent,
+            random_parent,
+        )
+
+        child_1.evaluate(city)
+        child_2.evaluate(city)
+        population.append(child_1)
+        population.append(child_2)
+
+    population.sort(
+        key=sorting_function,
+        reverse=True,
+    )
+    population = population[: population_size + 1]
+
+    return population
+
+
+def genetic_evaluation(schedule: Schedule, genetic_mapping: dict, bonus: int):
     score = 0
 
     for intersection_id, intersection_schedule in schedule.schedule.items():
         if not (intersection_id in genetic_mapping.keys()):
-            score += car_bonus * 2
+            score += bonus * 2
             continue
         streets = set(intersection_schedule)
         for street in streets:
             if not (street in genetic_mapping[intersection_id].keys()):
-                score += car_bonus * 2
+                score += bonus * 2
                 continue
             street_time = intersection_schedule.count(street)
 
             if not (street_time in genetic_mapping[intersection_id][street].keys()):
-                score += car_bonus * 2
+                score += bonus * 2
                 continue
             elif genetic_mapping[intersection_id][street][street_time] == min(
                 genetic_mapping[intersection_id][street].values()
             ):
-                score += car_bonus
+                score += bonus
     return score
 
 
-def genetic_mapping(schedule: Schedule, mapping: dict):
+def chromossome_mapping(schedule: Schedule, mapping: dict):
     for intersection_id, intersection_schedule in schedule.schedule.items():
         if not (intersection_id in mapping.keys()):
             mapping[intersection_id] = {}
@@ -236,3 +238,52 @@ def cross_over(
                 child_2.schedule[intersection_id] = parent_2.schedule[intersection_id]
 
     return [child_1, child_2]
+
+
+def mutate_random_intersection(city: City, schedule: Schedule):
+    intersections = list(enumerate(city.intersections.items()))
+    _, (intersection_id, intersection) = intersections[
+        randint(0, len(intersections) - 1)
+    ]
+
+    intersection_schedule = distributed_sum_permutation(
+        len(intersection.incoming_streets), city.duration
+    )
+    schedule.schedule[intersection_id] = []
+
+    for index, street in enumerate(intersection.incoming_streets):
+        schedule.schedule[intersection_id] += [
+            street.name for _ in range(intersection_schedule[index])
+        ]
+    return schedule
+
+
+def mutate_single_street(city: City, schedule: Schedule):
+    intersections = list(city.intersections.keys())
+    intersection_id = intersections[randint(0, len(intersections) - 1)]
+    current_intersection_schedule = schedule.schedule[intersection_id]
+
+    current_intersection_schedule_dict = {
+        street_name: current_intersection_schedule.count(street_name)
+        for street_name in set(current_intersection_schedule)
+    }
+
+    streets = list(current_intersection_schedule_dict.items())
+    if len(streets) > 1:
+        street, street_time = streets[randint(0, len(streets) - 1)]
+    else:
+        street, street_time = streets[0]
+
+    remaining_time = city.duration - (
+        sum(list(current_intersection_schedule_dict.values())) - street_time
+    )
+
+    current_intersection_schedule_dict[street] = randint(0, remaining_time)
+
+    schedule.schedule[intersection_id] = [
+        street_name
+        for street_name, street_time in current_intersection_schedule_dict.items()
+        for _ in range(street_time)
+    ]
+
+    return schedule
