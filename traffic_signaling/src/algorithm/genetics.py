@@ -27,7 +27,8 @@ def genetic_algorithm_process(
         for _ in range(population_size)
     ]
 
-    print(f"Starting process {os.getpid()} with a population of size {population_size}")
+    print(
+        f"Starting process {os.getpid()} with a population of size {population_size}")
 
     genetic_map = {}
     for schedule in population:
@@ -134,7 +135,7 @@ def genetic_algorithm(
         )
 
     print(f"Final population: {[x.last_score for x in population]}")
-    return population
+    return population[0]
 
 
 def next_generation(

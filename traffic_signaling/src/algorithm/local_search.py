@@ -4,13 +4,13 @@ from model.city import City
 from model.schedule import Schedule
 
 
-def iterated_local_search(city: City, number_of_iterations: int, number_of_mutations_per_iteration: int):
+def iterated_local_search(city: City, number_of_iterations: int, number_of_mutations_per_iteration: int, initial_schedule=None):
     first_solution = generate_random_solution(
-        city, distributed_sum_permutation)
+        city, distributed_sum_permutation) if initial_schedule is None else initial_schedule
     current_max = first_solution, first_solution.evaluate(city)
     for i in range(number_of_iterations):
         perturbation = mutate_schedule(
-            city, current_max[0], (number_of_iterations-i)/number_of_iterations)
+            city, current_max[0], (number_of_iterations-i)/(2*number_of_iterations))
         current = perturbation, perturbation.evaluate(city)
         mutations = []
         for _ in range(number_of_mutations_per_iteration):
@@ -20,4 +20,4 @@ def iterated_local_search(city: City, number_of_iterations: int, number_of_mutat
         if best_candidate[1] > current_max[1]:
             current_max = best_candidate
         print(best_candidate[1], current_max[1])
-    return current_max
+    return current_max[0]

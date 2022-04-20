@@ -5,6 +5,7 @@ from controller.pygame_controller import PygameController
 from algorithm.local_search import iterated_local_search
 from algorithm.taboo import taboo_search
 from algorithm.genetics import genetic_algorithm
+from algorithm.annealing import simulated_annealing
 
 from random import seed
 
@@ -74,7 +75,7 @@ class MainController:
                     if params == []:
                         continue
                     city = self.get_city()
-                    # simulated_annealing(city, params[0])
+                    simulated_annealing(city, params[0])
                 case 4:
                     params = self.get_params(self.ils_params)
                     if params == []:
@@ -82,9 +83,12 @@ class MainController:
                     city = self.get_city()
                     iterated_local_search(city, params[0], params[1])
                 case 5:
-                    # city = City.from_input("traffic_signaling/asset/data/e.txt")
-                    # schedule = genetic_algorithm(city, 50, 300, 50, 0.05)
-                    # iterated_local_search(city,50,schedule)
+                    city = self.get_city()
+                    schedule = genetic_algorithm(city, 75, 300, 50, 0.05)
+                    schedule.write_to_file('.', 'bruno')
+                    schedule = iterated_local_search(city, 300, 75, schedule)
+                    schedule.write_to_file('.', 'nando')
+                    print(schedule.last_score)
                     continue
                 case _:
                     print("Input option not valid")
