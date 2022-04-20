@@ -16,10 +16,10 @@ RED = (255, 0, 0)
 LIGHT_OFFSET = 70
 CAR_OFFSET = 1.8
 
-ROAD_IMAGE = '../asset/img/road.png'
-CAR_IMAGE = '../asset/img/car.png'
-GREEN_LIGHT_IMAGE = '../asset/img/green.png'
-RED_LIGHT_IMAGE = '../asset/img/red.png'
+ROAD_IMAGE = 'traffic_signaling/asset/img/road.png'
+CAR_IMAGE = 'traffic_signaling/asset/img/car.png'
+GREEN_LIGHT_IMAGE = 'traffic_signaling/asset/img/green.png'
+RED_LIGHT_IMAGE = 'traffic_signaling/asset/img/red.png'
 
 
 class CityViewer:

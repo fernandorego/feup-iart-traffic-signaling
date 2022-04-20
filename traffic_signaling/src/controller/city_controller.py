@@ -2,12 +2,12 @@ import pygame
 import math
 from collections import deque
 from time import sleep
-from model.city import City
-from model.schedule import Schedule
-from view.city_viewer import CityViewer
+from traffic_signaling.src.model.city import City
+from traffic_signaling.src.model.schedule import Schedule
+from traffic_signaling.src.view.city_viewer import CityViewer
 
 BG_COLOR = (50, 220, 230)
-BG_IMAGE = '../asset/img/grass.jpg'
+BG_IMAGE = 'traffic_signaling/asset/img/grass.jpg'
 MARGIN_OFFSET = 50
 
 
