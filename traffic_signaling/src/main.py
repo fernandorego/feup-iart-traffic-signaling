@@ -1,9 +1,10 @@
-from random import random, seed
-import time
+from random import seed
 from model.city import City
 from model.schedule import Schedule
 from algorithm.common import generate_random_solution, random_sum_permutation
 from algorithm.annealing import simulated_annealing
+from algorithm.local_search import iterated_local_search
+from algorithm.taboo import taboo_search
 
 if __name__ == "__main__":
     seed()

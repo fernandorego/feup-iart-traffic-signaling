@@ -1,7 +1,6 @@
 from model.city import City
 from model.schedule import Schedule
-from model.intersection import Intersection
-from random import randint
+from random import randint, random
 
 
 def generate_random_solution(city: City, schedule_generator):
@@ -43,7 +42,7 @@ def distributed_sum_permutation(length: int, perm_sum: int):
     return permutation
 
 
-def mutate_intersection(city: City, schedule: Schedule):
+def mutate_intersection(city: City, schedule: Schedule) -> tuple[Schedule, int]:
     intersections = list(enumerate(city.intersections.items()))
     _, (intersection_id, intersection) = intersections[
         randint(0, len(intersections) - 1)
@@ -65,9 +64,9 @@ def mutate_intersection(city: City, schedule: Schedule):
             schedule.schedule[intersection_id] += [
                 street.name for _ in range(street_green_light_time)
             ]
-
         if intersection_remaining_time == 0:
             break
+
     return (schedule, intersection)
 
 def mutate_single_street(city: City, schedule: Schedule):
@@ -102,3 +101,19 @@ def mutate_single_street(city: City, schedule: Schedule):
     ]
 
     return schedule
+
+def mutate_schedule(city, schedule, strength):
+    another_solution = generate_random_solution(
+        city, distributed_sum_permutation)
+    return mix_solutions(city, schedule, another_solution, strength)
+
+
+def mix_solutions(city, base_schedule, foreigner_schedule, probability):
+    perturbation = Schedule()
+    for j in range(city.no_intersections):
+        r = random()
+        if r < probability:
+            perturbation.schedule[j] = foreigner_schedule.schedule[j]
+        else:
+            perturbation.schedule[j] = base_schedule.schedule[j]
+    return perturbation
