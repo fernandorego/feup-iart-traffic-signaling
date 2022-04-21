@@ -10,7 +10,7 @@ from model.schedule import Schedule
 from .common import (
     generate_random_solution,
     mutate_schedule,
-    random_sum_permutation,
+    distributed_random_sum_permutation,
     mutate_intersection,
 )
 
@@ -24,7 +24,7 @@ def genetic_algorithm_process(
 ):
 
     population = [
-        generate_random_solution(city, random_sum_permutation)
+        generate_random_solution(city, distributed_random_sum_permutation)
         for _ in range(population_size)
     ]
 
@@ -40,7 +40,7 @@ def genetic_algorithm_process(
             city,
             population,
             population_size,
-            lambda x : mutate_schedule(city, x, 0.1),
+            lambda x: mutate_schedule(city, x, 0.1),
             cross_over,
             (
                 lambda x: x.last_score
@@ -124,7 +124,7 @@ def genetic_algorithm(
             city,
             population,
             population_size,
-            lambda x : mutate_schedule(city, x, 0.1),
+            lambda x: mutate_schedule(city, x, 0.1),
             cross_over,
             (lambda x: x.last_score),
             mutation_chance,
@@ -247,7 +247,7 @@ def mutate_random_intersection(city: City, schedule: Schedule):
         randint(0, len(intersections) - 1)
     ]
 
-    intersection_schedule = random_sum_permutation(
+    intersection_schedule = distributed_random_sum_permutation(
         len(intersection.incoming_streets), city.duration
     )
     schedule.schedule[intersection_id] = []
