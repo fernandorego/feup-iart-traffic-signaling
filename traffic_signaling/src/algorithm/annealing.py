@@ -14,7 +14,7 @@ def simulated_annealing(city: City, number_of_iterations: int):
         print(f"For t = {t}, simulated annealing reached a score of {current_schedule.last_score}")
         T = scheduling_function(t)
         if T <= 0:
-            return current_schedule
+            break
         next_schedule = deepcopy(mutate_single_street(city, current_schedule))
         next_schedule.evaluate(city)
 
@@ -25,7 +25,7 @@ def simulated_annealing(city: City, number_of_iterations: int):
         if score_diff > 0 or random() <= exp(score_diff / T):
             current_schedule = next_schedule
         
-        
+    return current_schedule
 
 def scheduling_function(t: float, T0=3000):
     return T0 / (1 + log(1 + t))
