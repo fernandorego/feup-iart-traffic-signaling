@@ -21,10 +21,10 @@ def generate_random_solution(city: City, schedule_generator):
 
 
 def random_sum_permutation(length: int, perm_sum: int):
-    permutation = [0 for _ in range(length)]
-    while perm_sum > 0 or 0 not in permutation:
+    permutation = [1 for _ in range(length)]
+    while perm_sum > 0 and 1 in permutation:
         temp, index = randint(0, perm_sum), randint(0, length - 1)
-        if permutation[index] != 0 or perm_sum - temp < 0:
+        if permutation[index] != 1 or perm_sum - temp < 0:
             continue
         perm_sum -= temp
         permutation[index] += temp
@@ -35,15 +35,7 @@ def distributed_sum_permutation(length: int, perm_sum: int):
     if length > perm_sum:
         return random_sum_permutation(length, perm_sum)
 
-    permutation = [1 for _ in range(length)]
-    perm_sum -= length
-    while perm_sum > 0 or 1 not in permutation:
-        temp, index = randint(0, perm_sum), randint(0, length - 1)
-        if permutation[index] != 1 or perm_sum - temp < 0:
-            continue
-        perm_sum -= temp
-        permutation[index] += temp
-    return permutation
+    return [1 for _ in range(length)]
 
 
 def mutate_intersection(city: City, schedule: Schedule) -> tuple[Schedule, int]:
@@ -52,26 +44,18 @@ def mutate_intersection(city: City, schedule: Schedule) -> tuple[Schedule, int]:
         randint(0, len(intersections) - 1)
     ]
 
-    intersection_remaining_time = city.duration
-    intersection_has_schedule = False
+    intersection_schedule = random_sum_permutation(
+        len(intersection.incoming_streets), city.duration
+    )
+    schedule.schedule[intersection_id] = []
 
-    for street in intersection.incoming_streets:
-        street_green_light_time = randint(0, intersection_remaining_time)
-
-        if street_green_light_time > 0:
-
-            if not (intersection_has_schedule):
-                schedule.schedule[intersection_id] = []
-                intersection_has_schedule = True
-
-            intersection_remaining_time -= street_green_light_time
-            schedule.schedule[intersection_id] += [
-                street.name for _ in range(street_green_light_time)
-            ]
-        if intersection_remaining_time == 0:
-            break
+    for index, street in enumerate(intersection.incoming_streets):
+        schedule.schedule[intersection_id] += [
+            street.name for _ in range(intersection_schedule[index])
+        ]
 
     return (schedule, intersection)
+
 
 def mutate_single_street(city: City, schedule: Schedule):
     intersections = list(city.intersections.keys())
@@ -90,7 +74,7 @@ def mutate_single_street(city: City, schedule: Schedule):
         street, street_time = streets[0]
     else:
         streets = list(city.intersections[intersection_id].incoming_streets)
-        street, street_time = streets[randint(0, len(streets) - 1)], 0
+        street, street_time = streets[randint(0, len(streets) - 1)].name, 0
 
     remaining_time = city.duration - (
         sum(list(current_intersection_schedule_dict.values())) - street_time
@@ -106,9 +90,9 @@ def mutate_single_street(city: City, schedule: Schedule):
 
     return schedule
 
+
 def mutate_schedule(city, schedule, strength):
-    another_solution = generate_random_solution(
-        city, distributed_sum_permutation)
+    another_solution = generate_random_solution(city, random_sum_permutation)
     return mix_solutions(city, schedule, another_solution, strength)
 
 
