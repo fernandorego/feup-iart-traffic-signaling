@@ -4,7 +4,7 @@ from algorithm.common import (
     generate_random_solution,
     mutate_intersection,
     mutate_schedule,
-    random_sum_permutation,
+    distributed_random_sum_permutation,
 )
 from model.city import City
 from model.schedule import Schedule
@@ -16,7 +16,7 @@ def iterated_local_search(
     number_of_mutations_per_iteration: int,
     perturbation_factor: int = 1,
 ):
-    first_solution = generate_random_solution(city, distributed_sum_permutation)
+    first_solution = generate_random_solution(city, distributed_random_sum_permutation)
     current_max = first_solution, first_solution.evaluate(city)
     for i in range(number_of_iterations):
         perturbation = mutate_schedule(
