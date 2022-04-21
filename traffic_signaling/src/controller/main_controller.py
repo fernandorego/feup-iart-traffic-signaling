@@ -1,13 +1,10 @@
 from model.city import City
 from model.schedule import Schedule
-from controller.city_controller import CityController
 from controller.pygame_controller import PygameController
 from algorithm.local_search import iterated_local_search
 from algorithm.taboo import taboo_search
 from algorithm.genetics import genetic_algorithm
 from algorithm.annealing import simulated_annealing
-
-from random import seed
 
 
 class MainController:
@@ -38,10 +35,6 @@ class MainController:
                        "City F - 1662 intersections"]
 
     def main_loop(self):
-        # seed()
-        # city = City.from_input("traffic_signaling/asset/data/e.txt")
-        # schedule = iterated_local_search(city, 50, 5)
-        # schedule[0].write_to_file(".", "my_solution")
         option = 0
         err = False
         while 1:
@@ -62,37 +55,48 @@ class MainController:
                     if params == []:
                         continue
                     city = self.get_city()
-                    genetic_algorithm(city, params[0], params[1],
-                                      params[2], params[3])
+                    schedule = genetic_algorithm(city, params[0], params[1],
+                                                 params[2], params[3])
+                    schedule.write_to_file('.', 'my_solution.txt')
                 case 2:
                     params = self.get_params(self.tabu_params)
                     if params == []:
                         continue
                     city = self.get_city()
-                    taboo_search(city, params[0], params[1], params[2])
+                    schedule: Schedule = taboo_search(
+                        city, params[0], params[1], params[2])
+                    schedule.write_to_file('.', 'my_solution.txt')
                 case 3:
                     params = self.get_params(self.annealing_params)
                     if params == []:
                         continue
                     city = self.get_city()
-                    simulated_annealing(city, params[0])
+                    schedule: Schedule = simulated_annealing(city, params[0])
+                    schedule.write_to_file('.', 'my_solution.txt')
                 case 4:
                     params = self.get_params(self.ils_params)
                     if params == []:
                         continue
                     city = self.get_city()
-                    iterated_local_search(city, params[0], params[1])
+                    schedule: Schedule = iterated_local_search(
+                        city, params[0], params[1])
+                    schedule.write_to_file('.', 'my_solution.txt')
                 case 5:
                     city = self.get_city()
-                    schedule = genetic_algorithm(city, 75, 300, 50, 0.05)
-                    schedule.write_to_file('.', 'bruno')
-                    schedule = iterated_local_search(city, 300, 75, schedule)
-                    schedule.write_to_file('.', 'nando')
-                    print(schedule.last_score)
+                    schedule: Schedule = genetic_algorithm(
+                        city, 75, 300, 50, 0.05)
+                    schedule: Schedule = iterated_local_search(
+                        city, 300, 75, schedule)
+                    schedule.write_to_file('.', 'my_solution.txt')
                     continue
                 case _:
                     print("Input option not valid")
                     err = True
+                    continue
+
+            if city.no_intersections < 15:
+                controller = PygameController(city)
+                controller.simulate(schedule)
 
     def get_params(self, params_list):
         params = []
