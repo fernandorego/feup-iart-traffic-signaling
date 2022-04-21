@@ -2,12 +2,13 @@ from copy import deepcopy
 from math import log, exp
 from random import random
 from model.city import City
-from .common import distributed_sum_permutation, generate_random_solution, mutate_single_street
+from .common import distributed_sum_permutation, generate_random_solution
 
-def simulated_annealing(city: City, number_of_iterations: int):
+def simulated_annealing(city: City, number_of_iterations: int, mutation_operator, current_schedule=None):
     t = 0
     
-    current_schedule = generate_random_solution(city, distributed_sum_permutation)
+    if current_schedule == None:
+        current_schedule = generate_random_solution(city, distributed_sum_permutation)
     current_schedule.evaluate(city)
 
     for t in range(number_of_iterations):
@@ -15,7 +16,7 @@ def simulated_annealing(city: City, number_of_iterations: int):
         T = scheduling_function(t)
         if T <= 0:
             break
-        next_schedule = deepcopy(mutate_single_street(city, current_schedule))
+        next_schedule = deepcopy(mutation_operator(current_schedule))
         next_schedule.evaluate(city)
 
         score_diff = next_schedule.last_score - current_schedule.last_score
