@@ -20,7 +20,7 @@ def generate_random_solution(city: City, schedule_generator):
     return schedule
 
 
-def random_sum_permutation(length: int, perm_sum: int):
+def distributed_random_sum_permutation(length: int, perm_sum: int):
     permutation = [1 for _ in range(length)]
     while perm_sum > 0 and 1 in permutation:
         temp, index = randint(0, perm_sum), randint(0, length - 1)
@@ -33,7 +33,7 @@ def random_sum_permutation(length: int, perm_sum: int):
 
 def distributed_sum_permutation(length: int, perm_sum: int):
     if length > perm_sum:
-        return random_sum_permutation(length, perm_sum)
+        return distributed_random_sum_permutation(length, perm_sum)
 
     return [1 for _ in range(length)]
 
@@ -44,7 +44,7 @@ def mutate_intersection(city: City, schedule: Schedule) -> tuple[Schedule, int]:
         randint(0, len(intersections) - 1)
     ]
 
-    intersection_schedule = random_sum_permutation(
+    intersection_schedule = distributed_random_sum_permutation(
         len(intersection.incoming_streets), city.duration
     )
     schedule.schedule[intersection_id] = []
@@ -80,7 +80,12 @@ def mutate_single_street(city: City, schedule: Schedule):
         sum(list(current_intersection_schedule_dict.values())) - street_time
     )
 
-    current_intersection_schedule_dict[street] = randint(0, remaining_time)
+    current_intersection_schedule_dict[street] = randint(
+        0, remaining_time
+    )  # isto está a dar problema.
+    # Numa das vezes, deu negativo, o que pode indicar
+    # Um schedule maior do que o tempo total da simulação
+    # print(sum(list(current_intersection_schedule_dict.values())), city.duration) # debug
 
     schedule.schedule[intersection_id] = [
         street_name
@@ -92,7 +97,9 @@ def mutate_single_street(city: City, schedule: Schedule):
 
 
 def mutate_schedule(city, schedule, strength):
-    another_solution = generate_random_solution(city, random_sum_permutation)
+    another_solution = generate_random_solution(
+        city, distributed_random_sum_permutation
+    )
     return mix_solutions(city, schedule, another_solution, strength)
 
 
