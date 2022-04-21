@@ -22,23 +22,27 @@ def generate_random_solution(city: City, schedule_generator):
 
 def random_sum_permutation(length: int, perm_sum: int):
     permutation = [0 for _ in range(length)]
-    while perm_sum > 0:
-        temp = randint(0, perm_sum)
+    while perm_sum > 0 or 0 not in permutation:
+        temp, index = randint(0, perm_sum), randint(0, length - 1)
+        if permutation[index] != 0 or perm_sum - temp < 0:
+            continue
         perm_sum -= temp
-        permutation[randint(0, length - 1)] += temp
+        permutation[index] += temp
     return permutation
 
 
 def distributed_sum_permutation(length: int, perm_sum: int):
     if length > perm_sum:
-        return [1 if index < perm_sum else 0 for index in range(length)]
+        return random_sum_permutation(length, perm_sum)
 
     permutation = [1 for _ in range(length)]
     perm_sum -= length
-    while perm_sum > 0:
-        temp = randint(0, perm_sum)
+    while perm_sum > 0 or 1 not in permutation:
+        temp, index = randint(0, perm_sum), randint(0, length - 1)
+        if permutation[index] != 1 or perm_sum - temp < 0:
+            continue
         perm_sum -= temp
-        permutation[randint(0, length - 1)] += temp
+        permutation[index] += temp
     return permutation
 
 
