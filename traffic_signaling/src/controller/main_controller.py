@@ -112,7 +112,7 @@ class MainController:
             while 1:
                 print()
                 print(params_list[i], ": (To exit type 0)")
-                param = self.get_option("->")
+                param = self.get_option("-> ")
                 if param == -1:
                     continue
                 elif param == 0:
@@ -129,13 +129,14 @@ class MainController:
         for i in range(len(params_list)):
             while 1:
                 print()
-                print(params_list[i], ": (To exit type 0)")
-                param = self.get_option_float("->")
+                print(
+                    params_list[i], ": (To exit type 0)")
+                param = self.get_option_float("interval: (0.0, 1.0] -> ")
                 if param == -1:
                     continue
                 elif param == 0:
                     return []
-                elif param > 0:
+                elif param > 0 and param <= 1:
                     params.append(param)
                     break
                 print("Invalid Number")

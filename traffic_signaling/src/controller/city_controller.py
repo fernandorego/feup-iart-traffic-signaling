@@ -38,7 +38,6 @@ class CityController:
         return
 
     def simulate(self):
-        # print(self.schedule.evaluate(self.city))
         # setup simulation helpers
         street_queue = {street_id: deque()
                         for street_id in range(self.city.no_streets)}
