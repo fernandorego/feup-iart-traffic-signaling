@@ -3,6 +3,7 @@ from algorithm.common import distributed_random_sum_permutation, generate_random
 from model.city import City
 import numpy as np
 from matplotlib import pyplot as plt
+from copy import deepcopy
 
 PATH = "traffic_signaling/asset/out/taboo_result.csv"
 
@@ -28,7 +29,7 @@ def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_
         mutated, tries = 0, 0
         while mutated < number_of_mutations_per_iteration:
             candidate, mutated_intersection = mutate_intersection(
-                city, current[0])
+                city, deepcopy(current[0]))
             if tries > 100 or taboo_memory[mutated_intersection.id] <= 0:
                 mutations.append(
                     (candidate, mutated_intersection, candidate.evaluate(city)))
@@ -43,7 +44,7 @@ def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_
             0, (number_of_iterations - i) // 2)
         improvement_to_max = current[1] - current_max[1]
         if improvement_to_max > 0:
-            current_max = current
+            current_max = tuple(current)
 
         print(
             f"On iteration {i}, taboo search found a score of {current[1]}. Best score yet is {current_max[1]}")
@@ -54,6 +55,8 @@ def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_
         if -improvement_to_max > avg_score//(1/max_worse_jump_percentage):
             current = current_max
 
+    print(current_max)
+    print(current_max[0].evaluate(city))
     return current_max[0]
 
 

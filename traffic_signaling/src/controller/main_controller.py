@@ -14,7 +14,7 @@ class MainController:
     def __init__(self) -> None:
         self.title = "Traffic Signaling - Hash Code Problem"
         self.menu = ["Genetic Algorithm", "Tabu Search", "Simulated Annealing",
-                     "Iterated Local Search"]  # , "Automatic Mode"]
+                     "Iterated Local Search"]
 
         self.genetic_params = ["Number of Generations",
                                "Population Size",
@@ -24,8 +24,6 @@ class MainController:
 
         self.tabu_params = ["Number of Iterations",
                             "Number of Mutations per Iteration"]
-
-        self.tabu_params2 = ["Max Worse Jump Percentage"]
 
         self.annealing_params = ["Number of Iterations"]
 
@@ -68,12 +66,11 @@ class MainController:
                         EXPORT_PATH, 'genetic_last_solution.txt')
                 case 2:
                     params = self.get_params(self.tabu_params)
-                    params2 = self.get_params_float(self.tabu_params2)
                     if params == []:
                         continue
                     city = self.get_city()
                     schedule: Schedule = taboo_search(
-                        city, params[0], params[1], params2[0])
+                        city, params[0], params[1])
                     print_taboo_results_graph_from_file()
                     schedule.write_to_file(
                         EXPORT_PATH, 'tabu_last_solution.txt')
@@ -99,14 +96,6 @@ class MainController:
                     print_ils_results_graph_from_file()
                     schedule.write_to_file(
                         EXPORT_PATH, 'ils_last_solution.txt')
-                # case 5:
-                #    city = self.get_city()
-                #    schedule: Schedule = genetic_algorithm(
-                #        city, 75, 300, 50, 0.05)
-                #    schedule: Schedule = iterated_local_search(
-                #        city, 300, 75, schedule)
-                #    schedule.write_to_file('.', 'my_solution.txt')
-                #    continue
                 case _:
                     print("Input option not valid")
                     err = True
@@ -123,7 +112,7 @@ class MainController:
             while 1:
                 print()
                 print(params_list[i], ": (To exit type 0)")
-                param = self.get_option("Input value: ")
+                param = self.get_option("->")
                 if param == -1:
                     continue
                 elif param == 0:
@@ -141,7 +130,7 @@ class MainController:
             while 1:
                 print()
                 print(params_list[i], ": (To exit type 0)")
-                param = self.get_option_float("Input value: ")
+                param = self.get_option_float("->")
                 if param == -1:
                     continue
                 elif param == 0:

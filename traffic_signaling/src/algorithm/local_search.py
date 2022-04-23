@@ -1,8 +1,7 @@
-from random import randint, random
+from copy import deepcopy
 import numpy as np
 from matplotlib import pyplot as plt
 from algorithm.common import (
-    distributed_sum_permutation,
     generate_random_solution,
     mutate_intersection,
     mutate_schedule,
@@ -18,7 +17,7 @@ def iterated_local_search(
     city: City,
     number_of_iterations: int,
     number_of_mutations_per_iteration: int,
-    perturbation_factor: int = 1,
+    perturbation_factor: int = 0.5,
     file_output: bool = True,
     initial_schedule=None
 ):
@@ -29,20 +28,20 @@ def iterated_local_search(
         file.flush()
 
     first_solution = generate_random_solution(
-        city, distributed_sum_permutation) if initial_schedule is None else initial_schedule
+        city, distributed_random_sum_permutation) if initial_schedule is None else initial_schedule
     current_max = first_solution, first_solution.evaluate(city)
     for i in range(number_of_iterations):
         perturbation_strength = perturbation_factor * \
             (number_of_iterations - i) / number_of_iterations
         perturbation = mutate_schedule(
             city,
-            current_max[0],
+            deepcopy(current_max[0]),
             perturbation_strength
         )
         current = perturbation, perturbation.evaluate(city)
         mutations = []
         for _ in range(number_of_mutations_per_iteration):
-            candidate, _ = mutate_intersection(city, current[0])
+            candidate, _ = mutate_intersection(city, deepcopy(current[0]))
             mutations.append((candidate, candidate.evaluate(city)))
         best_candidate = max(mutations, key=lambda x: x[1])
         if best_candidate[1] > current_max[1]:
