@@ -21,6 +21,9 @@ def generate_random_solution(city: City, schedule_generator):
 
 
 def distributed_random_sum_permutation(length: int, perm_sum: int):
+    if length > perm_sum:
+        return distributed_random_sum_permutation(length, perm_sum)
+
     permutation = [1 for _ in range(length)]
     while perm_sum > 0 and 1 in permutation:
         temp, index = randint(0, perm_sum), randint(0, length - 1)
