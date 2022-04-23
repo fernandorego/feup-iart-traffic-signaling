@@ -4,6 +4,16 @@ from random import randint, random
 
 
 def generate_random_solution(city: City, schedule_generator):
+    """
+    Generates a random green light cycle schedule for a given city.
+
+    Parameters:
+        city: City for which the schedule will be created.
+        schedule_generator: function responsible for creating a schedule for each intersection. See permutation functions below
+
+    Return:
+        A newly created schedule for the given city
+    """
     schedule = Schedule()
 
     for intersection_id, intersection in city.intersections.items():
@@ -21,6 +31,21 @@ def generate_random_solution(city: City, schedule_generator):
 
 
 def distributed_random_sum_permutation(length: int, perm_sum: int):
+    """
+    Creates a list of lenght length of integers with a sum inferior than perm_sum.
+    If length is larger that perm_sum, generates a random permutation of integer values, with the same sum condition.
+    Else, the permutation is guaranteed to have each element with a value equal or higher to 1.
+
+    Parameters:
+        length: size of the list
+        perm_sum: max possible value of the sum of the elements of the list
+
+    Return:
+        list of lenght length of integers with a sum inferior than perm_sum
+    """
+    if length > perm_sum:
+        return distributed_random_sum_permutation(length, perm_sum)
+
     permutation = [1 for _ in range(length)]
     while perm_sum > 0 and 1 in permutation:
         temp, index = randint(0, perm_sum), randint(0, length - 1)
@@ -32,6 +57,18 @@ def distributed_random_sum_permutation(length: int, perm_sum: int):
 
 
 def distributed_sum_permutation(length: int, perm_sum: int):
+    """
+    Creates a list of lenght length of integers with a sum inferior than perm_sum.
+    If length is larger that perm_sum, generates a random permutation of integer values, , with the same sum condition.
+    Else, the list is filled with 1s.
+
+    Parameters:
+        length: size of the list
+        perm_sum: max possible value of the sum of the elements of the list
+
+    Return:
+        list of lenght length of integers with a sum inferior than perm_sum
+    """
     if length > perm_sum:
         return distributed_random_sum_permutation(length, perm_sum)
 
@@ -58,6 +95,16 @@ def mutate_intersection(city: City, schedule: Schedule) -> tuple[Schedule, int]:
 
 
 def mutate_single_street(city: City, schedule: Schedule):
+    """
+    Changes the green light time for a single random street on a random intersection on a given schedule for a given city.
+
+    Parameters:
+        city: a city object
+        schedule: green light schedule for the city
+
+    Return:
+        schedule with updated green light cycle
+    """
     intersections = list(city.intersections.keys())
     intersection_id = intersections[randint(0, len(intersections) - 1)]
     current_intersection_schedule = schedule.schedule[intersection_id]
@@ -80,12 +127,7 @@ def mutate_single_street(city: City, schedule: Schedule):
         sum(list(current_intersection_schedule_dict.values())) - street_time
     )
 
-    current_intersection_schedule_dict[street] = randint(
-        0, remaining_time
-    )  # isto está a dar problema.
-    # Numa das vezes, deu negativo, o que pode indicar
-    # Um schedule maior do que o tempo total da simulação
-    # print(sum(list(current_intersection_schedule_dict.values())), city.duration) # debug
+    current_intersection_schedule_dict[street] = randint(0, remaining_time)
 
     schedule.schedule[intersection_id] = [
         street_name
