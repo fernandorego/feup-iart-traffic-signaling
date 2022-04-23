@@ -81,6 +81,22 @@ def genetic_algorithm(
     mutation_chance: float,
     file_output: bool = True,
 ):
+    """
+    Genetic algorithm that generates a green light schedule for a given city.
+    For a part of the algorithm, the population is divided into subpopulations which evolve in parallel.
+    After number_of_generations generations have passed, the subpopulations are merged and evolve as one, for another
+    number_of_generations generations.
+
+    Parameters:
+        city: city for which the schedule will be made
+        number_of_generations: number of generations upon which the population will evolve
+        subpopulation_size: size of separated groups of the population
+        mutation_chance: probability of a schedule mutating from one generation to another
+        file_output: whether the best final schedule will be saved to a file or not
+
+    Return:
+        a optimized schedule for the given city
+    """
     population = []
     processes = []
     result = Manager().Queue()
