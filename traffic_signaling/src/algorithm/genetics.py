@@ -25,7 +25,7 @@ def genetic_algorithm_process(
     population_size: int,
     mutation_chance: float,
     result: Queue,
-    file
+    file,
 ):
 
     population = [
@@ -33,8 +33,7 @@ def genetic_algorithm_process(
         for _ in range(population_size)
     ]
 
-    print(
-        f"Starting process {os.getpid()} with a population of size {population_size}")
+    print(f"Starting process {os.getpid()} with a population of size {population_size}")
 
     genetic_map = {}
     for schedule in population:
@@ -62,7 +61,8 @@ def genetic_algorithm_process(
         average = sum([x.last_score for x in population]) / len(population)
         process = os.getpid()
         print(
-            f"Process {process} at generation {generation} scored an average of {int(average)}")
+            f"Process {process} at generation {generation} scored an average of {int(average)}"
+        )
         if file is not None:
             file.write(f"1,{process},{generation},{average}\n")
             file.flush()
@@ -79,7 +79,7 @@ def genetic_algorithm(
     population_size: int,
     subpopulation_size: int,
     mutation_chance: float,
-    file_output: bool = True
+    file_output: bool = True,
 ):
     population = []
     processes = []
@@ -105,7 +105,7 @@ def genetic_algorithm(
                     subpopulation,
                     mutation_chance,
                     result,
-                    file
+                    file,
                 ),
             )
         )
@@ -262,6 +262,16 @@ def cross_over(
 
 
 def mutate_random_intersection(city: City, schedule: Schedule):
+    """
+    Changes the green light cycle for a random intersection on a given schedule for a given city.
+
+    Parameters:
+        city: a city object
+        schedule: green light schedule for the city
+
+    Return:
+        schedule with updated green light cycle
+    """
     intersections = list(enumerate(city.intersections.items()))
     _, (intersection_id, intersection) = intersections[
         randint(0, len(intersections) - 1)
@@ -312,21 +322,23 @@ def mutate_single_street(city: City, schedule: Schedule):
 
 def print_genetic_results_graph_from_file():
     with open(PATH) as f:
-        metrics = [list(map(lambda i: i.strip('\n'), x.split(',')))
-                   for x in f.readlines()[1:]]
+        metrics = [
+            list(map(lambda i: i.strip("\n"), x.split(","))) for x in f.readlines()[1:]
+        ]
 
     processes = set(int(x[1]) for x in metrics)
     xs = np.array(list(set(int(x[2]) for x in metrics if int(x[0]) == 1)))
 
     # First phase
     for process in processes:
-        ys = np.array([float(x[3]) for x in metrics if int(
-            x[0]) == 1 and int(x[1]) == process])
+        ys = np.array(
+            [float(x[3]) for x in metrics if int(x[0]) == 1 and int(x[1]) == process]
+        )
         if len(ys) == 0:
             continue
-        plt.plot(xs, ys, label=f'Process {process}')
+        plt.plot(xs, ys, label=f"Process {process}")
     plt.legend(loc="upper left", frameon=False)
-    plt.title('Genetic algorithm: concurrent phase')
+    plt.title("Genetic algorithm: concurrent phase")
     plt.xlabel("Iteration")
     plt.ylabel("Solution score")
     plt.show()
@@ -335,7 +347,7 @@ def print_genetic_results_graph_from_file():
     plt.clf()
     ys = np.array([float(x[3]) for x in metrics if int(x[0]) == 2])
     plt.plot(xs, ys)
-    plt.title('Genetic algorithm: merged population phase')
+    plt.title("Genetic algorithm: merged population phase")
     plt.xlabel("Iteration")
     plt.ylabel("Solution score")
     plt.show()
