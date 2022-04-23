@@ -167,6 +167,21 @@ def next_generation(
     sorting_function,
     mutation_chance: float,
 ):
+    """
+    For a given population, creates the next generation of schedules.
+
+    Parameters:
+        city: city for which the schedules were made
+        population: current population
+        population_size: max size of the population
+        mutation_operator: function that mutates a schedule
+        cross_over_function: cross over operator of the genetic algorithm
+        sorting_function: function that orders the population in a ranking
+        mutation_chance: probability of a schedule mutating
+
+    Return:
+        population of the next generation
+    """
     for schedule in population:
         if random() <= mutation_chance:
             schedule = mutation_operator(schedule)
