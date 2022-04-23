@@ -128,7 +128,7 @@ class CityController:
         return score
 
     def draw(self, green_lights, cars_position, current_time, score):
-        '''Draw the city state'''
+        '''Draw the city state and update screen'''
         bg = pygame.transform.scale(
             pygame.image.load(BG_IMAGE), self.window_size)
         self.window.blit(bg, (0, 0))
