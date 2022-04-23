@@ -244,6 +244,20 @@ def chromossome_mapping(schedule: Schedule, mapping: dict):
 def cross_over(
     city: City, cross_over_point: int, parent_1: Schedule, parent_2: Schedule
 ):
+    """
+    Cross over operator for the genetic algorithm.
+    Generates two children by selecting the intersections' green light cycle of a parent up to
+    a cross over point, and then the ones from the other parent. The process is mirrored for each of the children.
+
+    Parameters:
+        city: city for which the parent schedules were made
+        cross_over_point: cross over point of the operator
+        parent_1: first parent schedule
+        parent_2: second parent schedule
+
+    Return:
+        list with 2 children schedules
+    """
     child_1, child_2 = Schedule(), Schedule()
     for index, intersection_id in enumerate(city.intersections.keys()):
         if intersection_id in parent_1.schedule.keys():
