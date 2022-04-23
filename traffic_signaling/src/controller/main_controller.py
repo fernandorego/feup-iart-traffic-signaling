@@ -1,17 +1,18 @@
 from model.city import City
 from model.schedule import Schedule
 from controller.pygame_controller import PygameController
-from algorithm.local_search import iterated_local_search
-from algorithm.taboo import taboo_search
-from algorithm.genetics import genetic_algorithm
-from algorithm.annealing import simulated_annealing
+from algorithm.local_search import iterated_local_search, print_ils_results_graph_from_file
+from algorithm.taboo import taboo_search, print_taboo_results_graph_from_file
+from algorithm.genetics import genetic_algorithm, print_genetic_results_graph_from_file
+from algorithm.annealing import simulated_annealing, print_sa_results_graph_from_file
+from algorithm.common import mutate_schedule, mutate_intersection, mutate_single_street
 
 
 class MainController:
     def __init__(self) -> None:
         self.title = "Traffic Signaling - Hash Code Problem"
         self.menu = ["Genetic Algorithm", "Tabu Search", "Simulated Annealing",
-                     "Iterated Local Search", "Automatic Mode"]
+                     "Iterated Local Search"]  # , "Automatic Mode"]
 
         self.genetic_params = ["Number of Generations",
                                "Population Size",
@@ -60,6 +61,7 @@ class MainController:
                     city = self.get_city()
                     schedule = genetic_algorithm(city, params[0], params[1],
                                                  params[2], params2[0])
+                    print_genetic_results_graph_from_file()
                     schedule.write_to_file('.', 'my_solution.txt')
                 case 2:
                     params = self.get_params(self.tabu_params)
@@ -69,13 +71,18 @@ class MainController:
                     city = self.get_city()
                     schedule: Schedule = taboo_search(
                         city, params[0], params[1], params2[0])
+                    print_taboo_results_graph_from_file()
                     schedule.write_to_file('.', 'my_solution.txt')
                 case 3:
                     params = self.get_params(self.annealing_params)
                     if params == []:
                         continue
                     city = self.get_city()
-                    schedule: Schedule = simulated_annealing(city, params[0])
+                    iteration_mutation_pairs = [(params[0], lambda x: mutate_schedule(city, x, 0.5)), (
+                        params[0], lambda x: mutate_intersection(city, x)[0]), (params[0], lambda x: mutate_single_street(city, x))]
+                    schedule: Schedule = simulated_annealing(
+                        city, iteration_mutation_pairs)
+                    print_sa_results_graph_from_file()
                     schedule.write_to_file('.', 'my_solution.txt')
                 case 4:
                     params = self.get_params(self.ils_params)
@@ -84,15 +91,16 @@ class MainController:
                     city = self.get_city()
                     schedule: Schedule = iterated_local_search(
                         city, params[0], params[1])
+                    print_ils_results_graph_from_file()
                     schedule.write_to_file('.', 'my_solution.txt')
-                case 5:
-                    city = self.get_city()
-                    schedule: Schedule = genetic_algorithm(
-                        city, 75, 300, 50, 0.05)
-                    schedule: Schedule = iterated_local_search(
-                        city, 300, 75, schedule)
-                    schedule.write_to_file('.', 'my_solution.txt')
-                    continue
+                # case 5:
+                #    city = self.get_city()
+                #    schedule: Schedule = genetic_algorithm(
+                #        city, 75, 300, 50, 0.05)
+                #    schedule: Schedule = iterated_local_search(
+                #        city, 300, 75, schedule)
+                #    schedule.write_to_file('.', 'my_solution.txt')
+                #    continue
                 case _:
                     print("Input option not valid")
                     err = True
