@@ -60,8 +60,8 @@ def scheduling_function(t: float, T0=3000):
 
 def print_sa_results_graph_from_file():
     with open(PATH) as f:
-        metrics = [y.strip('\n') for x in f.readlines()[1:]
-                   for y in x.split(' ')]
+        metrics = [list(map(lambda i: i.strip('\n'), x.split(',')))
+                   for x in f.readlines()[1:]]
 
     xs = np.array([int(x[0]) for x in metrics])
     scores = np.array([int(x[1]) for x in metrics])

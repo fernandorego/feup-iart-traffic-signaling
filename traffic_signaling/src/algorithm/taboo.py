@@ -59,7 +59,8 @@ def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_
 
 def print_taboo_results_graph_from_file():
     with open(PATH) as f:
-        metrics = [y for x in f.readlines()[1:] for y in x.strip('\n')]
+        metrics = [list(map(lambda i: i.strip('\n'), x.split(',')))
+                   for x in f.readlines()[1:]]
 
     xs = np.array([int(x[0]) for x in metrics])
     ys = np.array([int(x[1]) for x in metrics])

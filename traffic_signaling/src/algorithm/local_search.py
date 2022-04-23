@@ -58,7 +58,8 @@ def iterated_local_search(
 
 def print_ils_results_graph_from_file():
     with open(PATH) as f:
-        metrics = [y for x in f.readlines()[1:] for y in x.strip('\n')]
+        metrics = [list(map(lambda i: i.strip('\n'), x.split(',')))
+                   for x in f.readlines()[1:]]
 
     xs = np.array([int(x[0]) for x in metrics])
     ys = np.array([int(x[2]) for x in metrics])

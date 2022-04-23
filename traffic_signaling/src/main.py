@@ -24,10 +24,10 @@ if __name__ == "__main__":
     city = City.from_input("traffic_signaling/asset/data/e.txt")
     #taboo_search(city, 12, 1)
     # print_taboo_results_graph_from_file()
-    #iterated_local_search(city, 100, 10)
-    # print_ils_results_graph_from_file()
-    genetic_algorithm(city, 20, 10, 5, 0.2)
-    print_genetic_results_graph_from_file()
+    iterated_local_search(city, 50, 10)
+    print_ils_results_graph_from_file()
+    #genetic_algorithm(city, 50, 50, 20, 0.2)
+    # print_genetic_results_graph_from_file()
     # iteration_mutation_pairs = [(100, lambda x: mutate_schedule(city, x, 0.5)), (
     # 10, lambda x: mutate_intersection(city, x)[0]), (10, lambda x: mutate_single_street(city, x))]
     #schedule = simulated_annealing(city, iteration_mutation_pairs)
