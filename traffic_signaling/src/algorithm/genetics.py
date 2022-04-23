@@ -96,13 +96,15 @@ def genetic_algorithm(
 ):
     """
     Genetic algorithm that generates a green light schedule for a given city.
-    For a part of the algorithm, the population is divided into subpopulations which evolve in parallel.
+    For a part of the algorithm, the population is divided into subpopulations which evolve in parallel. These
+    subpopulations favor not only a better score, but also rarer chromossomes.
     After number_of_generations generations have passed, the subpopulations are merged and evolve as one, for another
     number_of_generations generations.
 
     Parameters:
         city: city for which the schedule will be made
         number_of_generations: number of generations upon which the population will evolve
+        population_size: max size of the population
         subpopulation_size: size of separated groups of the population
         mutation_chance: probability of a schedule mutating from one generation to another
         file_output: whether the best final schedule will be saved to a file or not
