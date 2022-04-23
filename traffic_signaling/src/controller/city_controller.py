@@ -13,18 +13,38 @@ MARGIN_OFFSET = 50
 
 class CityController:
     def __init__(self, city: City, window, window_size) -> None:
+        """
+        Constructor of CityController class
+
+        Properties:
+            city (City): main title of the program
+            city_viewer (CityViewer): City viewer to draw the different elements of the city
+            schedule (Schedule): schedule of a possible solution 
+            window (Surface): pygame window for display
+            window_size (tuple): tuple with width and height of pygame window
+        """
         self.city = city
         self.city_viewer = CityViewer(city)
         self.schedule = None
-        self.time = 0
         self.window = window
         self.window_size = window_size
         self.set_intersection_pos()
 
     def set_schedule(self, schedule: Schedule):
+        """
+        Set the schedule of the CityController.
+
+        Parameters:
+            schedule (Schedule): Schedule of a possible solution
+        """
         self.schedule = schedule
 
     def set_intersection_pos(self) -> None:
+        """
+        Set intersection position to draw each one in the screen.
+        The position for each intersection is obtained by creating an imaginary circumference and dividing it 
+        equally by each intersection.
+        """
         intersections_no = len(self.city.intersections)
         center = ((self.window_size[0] + 300) / 2, self.window_size[1] / 2)
         radius = self.window_size[1] / 2 - MARGIN_OFFSET
@@ -38,7 +58,7 @@ class CityController:
         return
 
     def simulate(self):
-        # setup simulation helpers
+        '''Run the simulation of a solution and draw each state during the process'''
         street_queue = {street_id: deque()
                         for street_id in range(self.city.no_streets)}
         green_cycle_duration, last_crossed = {}, {}
@@ -54,7 +74,6 @@ class CityController:
             street_queue[car_path[car.id][0].id].append(car.id)
             next_analysed_time[car.id] = 0
 
-        # run simulation
         score = 0
         for current_time in range(self.city.duration + 1):
             scheduled_removals = []
@@ -109,6 +128,7 @@ class CityController:
         return score
 
     def draw(self, green_lights, cars_position, current_time, score):
+        '''Draw the city state'''
         bg = pygame.transform.scale(
             pygame.image.load(BG_IMAGE), self.window_size)
         self.window.blit(bg, (0, 0))
