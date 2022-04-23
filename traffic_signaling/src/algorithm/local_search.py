@@ -1,4 +1,6 @@
 from random import randint, random
+import numpy as np
+from matplotlib import pyplot as plt
 from algorithm.common import (
     distributed_sum_permutation,
     generate_random_solution,
@@ -8,6 +10,8 @@ from algorithm.common import (
 )
 from model.city import City
 from model.schedule import Schedule
+
+PATH = "traffic_signaling/asset/out/ils_result.csv"
 
 
 def iterated_local_search(
@@ -19,7 +23,7 @@ def iterated_local_search(
 ):
     file = None
     if file_output:
-        file = open("traffic_signaling/asset/out/ils_result.csv", "w")
+        file = open(PATH, "w")
         file.write("ITERATION,PERTURBATION_STRENGTH,TENTATIVE_SCORE,BEST_SCORE\n")
         file.flush()
 
@@ -49,3 +53,18 @@ def iterated_local_search(
                 f"{i},{perturbation_strength},{best_candidate[1]},{current_max[1]}\n")
             file.flush()
     return current_max
+
+
+def print_ils_results_graph_from_file():
+    with open(PATH) as f:
+        metrics = [y for x in f.readlines()[1:] for y in x.strip('\n')]
+
+    xs = np.array([int(x[0]) for x in metrics])
+    ys = np.array([int(x[2]) for x in metrics])
+    plt.plot(xs, ys)
+
+    plt.title('Iterated local search')
+
+    plt.xlabel("Iteration")
+    plt.ylabel("Solution score")
+    plt.show()

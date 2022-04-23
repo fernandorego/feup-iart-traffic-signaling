@@ -1,17 +1,22 @@
-from random import randint, random
-from multiprocessing import Process, Queue, Manager
-from math import ceil
-from toolz import unique
-
-import os
-
-from model.city import City
-from model.schedule import Schedule
+from cProfile import label
 from .common import (
     generate_random_solution,
     mutate_schedule,
     distributed_random_sum_permutation,
 )
+from model.schedule import Schedule
+from model.city import City
+from random import randint, random
+from multiprocessing import Process, Queue, Manager
+from math import ceil
+from toolz import unique
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+import os
+
+PATH = "traffic_signaling/asset/out/genetic_result.csv"
 
 
 def genetic_algorithm_process(
@@ -303,3 +308,34 @@ def mutate_single_street(city: City, schedule: Schedule):
     ]
 
     return schedule
+
+
+def print_genetic_results_graph_from_file():
+    with open(PATH) as f:
+        metrics = [list(map(lambda i: i.strip('\n'), x.split(',')))
+                   for x in f.readlines()[1:]]
+
+    processes = set(int(x[1]) for x in metrics)
+    xs = np.array(list(set(int(x[2]) for x in metrics if int(x[0]) == 1)))
+
+    # First phase
+    for process in processes:
+        ys = np.array([float(x[3]) for x in metrics if int(
+            x[0]) == 1 and int(x[1]) == process])
+        if len(ys) == 0:
+            continue
+        plt.plot(xs, ys, label=f'Process {process}')
+    plt.legend(loc="upper left", frameon=False)
+    plt.title('Genetic algorithm: concurrent phase')
+    plt.xlabel("Iteration")
+    plt.ylabel("Solution score")
+    plt.show()
+
+    # Second phase
+    plt.clf()
+    ys = np.array([float(x[3]) for x in metrics if int(x[0]) == 2])
+    plt.plot(xs, ys)
+    plt.title('Genetic algorithm: merged population phase')
+    plt.xlabel("Iteration")
+    plt.ylabel("Solution score")
+    plt.show()

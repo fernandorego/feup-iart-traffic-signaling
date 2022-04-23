@@ -1,14 +1,17 @@
 from random import randint
-
 from algorithm.common import distributed_random_sum_permutation, generate_random_solution, mutate_intersection
 from model.city import City
+import numpy as np
+from matplotlib import pyplot as plt
+
+PATH = "traffic_signaling/asset/out/taboo_result.csv"
 
 
 def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_iteration: int,
                  max_worse_jump_percentage: int = 0.1, file_output: bool = True):
     file = None
     if file_output:
-        file = open("traffic_signaling/asset/out/taboo_result.csv", "w")
+        file = open(PATH, "w")
         file.write("ITERATION,TENTATIVE_SCORE,BEST_SCORE\n")
         file.flush()
 
@@ -52,3 +55,18 @@ def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_
             current = current_max
 
     return current_max
+
+
+def print_taboo_results_graph_from_file():
+    with open(PATH) as f:
+        metrics = [y for x in f.readlines()[1:] for y in x.strip('\n')]
+
+    xs = np.array([int(x[0]) for x in metrics])
+    ys = np.array([int(x[1]) for x in metrics])
+    plt.plot(xs, ys)
+
+    plt.title('Taboo search')
+
+    plt.xlabel("Iteration")
+    plt.ylabel("Solution score")
+    plt.show()

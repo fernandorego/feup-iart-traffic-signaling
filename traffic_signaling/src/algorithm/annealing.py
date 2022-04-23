@@ -6,12 +6,16 @@ from .common import (
     generate_random_solution,
     distributed_random_sum_permutation,
 )
+import numpy as np
+from matplotlib import pyplot as plt
+
+PATH = "traffic_signaling/asset/out/sa_result.csv"
 
 
 def simulated_annealing(city: City, iteration_mutation_pairs: list, file_output: bool = True):
     file = None
     if file_output:
-        file = open("traffic_signaling/asset/out/sa_result.csv", "w")
+        file = open(PATH, "w")
         file.write("INSTANT,SCORE,PROBABILITY,DIFF\n")
         file.flush()
 
@@ -33,7 +37,7 @@ def simulated_annealing(city: City, iteration_mutation_pairs: list, file_output:
             next_schedule.evaluate(city)
 
             score_diff = next_schedule.last_score - current_schedule.last_score
-            probability = exp(score_diff / T)
+            probability = min(exp(score_diff / T), 1)
 
             print(
                 f"Current T = {T}, Probability = {probability}, Score_diff = {score_diff}"
@@ -52,3 +56,19 @@ def simulated_annealing(city: City, iteration_mutation_pairs: list, file_output:
 
 def scheduling_function(t: float, T0=3000):
     return T0 / (1 + log(1 + t))
+
+
+def print_sa_results_graph_from_file():
+    with open(PATH) as f:
+        metrics = [y.strip('\n') for x in f.readlines()[1:]
+                   for y in x.split(' ')]
+
+    xs = np.array([int(x[0]) for x in metrics])
+    scores = np.array([int(x[1]) for x in metrics])
+    plt.plot(xs, scores)
+
+    plt.title('Simulated annealing')
+
+    plt.xlabel("Iteration")
+    plt.ylabel("Solution score")
+    plt.show()
