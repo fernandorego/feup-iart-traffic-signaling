@@ -37,5 +37,4 @@ def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_
         else:
             if -improvement_to_max > avg_score//(1/max_worse_jump_percentage):
                 current = current_max
-        print(current[1])
-    return current_max
+    return current_max[0]

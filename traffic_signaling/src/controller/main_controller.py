@@ -15,12 +15,14 @@ class MainController:
 
         self.genetic_params = ["Number of Generations",
                                "Population Size",
-                               "Subpopulation Size",
-                               "Mutation Probability"]
+                               "Subpopulation Size"]
+
+        self.genetic_params2 = ["Mutation Probability"]
 
         self.tabu_params = ["Number of Iterations",
-                            "Number of Mutations per Iteration",
-                            "Max Worse Jump Percentage"]
+                            "Number of Mutations per Iteration"]
+
+        self.tabu_params2 = ["Max Worse Jump Percentage"]
 
         self.annealing_params = ["Number of Iterations"]
 
@@ -52,19 +54,21 @@ class MainController:
                     return
                 case 1:
                     params = self.get_params(self.genetic_params)
-                    if params == []:
+                    params2 = self.get_params_float(self.genetic_params2)
+                    if params == [] or params2 == []:
                         continue
                     city = self.get_city()
                     schedule = genetic_algorithm(city, params[0], params[1],
-                                                 params[2], params[3])
+                                                 params[2], params2[0])
                     schedule.write_to_file('.', 'my_solution.txt')
                 case 2:
                     params = self.get_params(self.tabu_params)
+                    params2 = self.get_params_float(self.tabu_params2)
                     if params == []:
                         continue
                     city = self.get_city()
                     schedule: Schedule = taboo_search(
-                        city, params[0], params[1], params[2])
+                        city, params[0], params[1], params2[0])
                     schedule.write_to_file('.', 'my_solution.txt')
                 case 3:
                     params = self.get_params(self.annealing_params)
@@ -116,6 +120,24 @@ class MainController:
                 print("Invalid Number")
         return params
 
+    def get_params_float(self, params_list):
+        params = []
+
+        for i in range(len(params_list)):
+            while 1:
+                print()
+                print(params_list[i], ": (To exit type 0)")
+                param = self.get_option_float("Input value: ")
+                if param == -1:
+                    continue
+                elif param == 0:
+                    return []
+                elif param > 0:
+                    params.append(param)
+                    break
+                print("Invalid Number")
+        return params
+
     def get_city(self):
         print()
         for i in range(len(self.cities)):
@@ -144,6 +166,14 @@ class MainController:
     def get_option(self, msg):
         try:
             option = int(input(msg))
+            return option
+        except:
+            print("Invalid input")
+        return -1
+
+    def get_option_float(self, msg):
+        try:
+            option = float(input(msg))
             return option
         except:
             print("Invalid input")
