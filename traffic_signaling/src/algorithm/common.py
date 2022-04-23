@@ -39,6 +39,16 @@ def distributed_sum_permutation(length: int, perm_sum: int):
 
 
 def mutate_intersection(city: City, schedule: Schedule) -> tuple[Schedule, int]:
+    """
+    Changes the green light cycle for a random intersection on a given schedule for a given city.
+
+    Parameters:
+        city: a city object
+        schedule: green light schedule for the city
+
+    Return:
+        schedule with updated green light cycle
+    """
     intersections = list(enumerate(city.intersections.items()))
     _, (intersection_id, intersection) = intersections[
         randint(0, len(intersections) - 1)
