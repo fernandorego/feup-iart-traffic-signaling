@@ -12,7 +12,17 @@ from matplotlib import pyplot as plt
 PATH = "traffic_signaling/asset/out/sa_result.csv"
 
 
-def simulated_annealing(city: City, iteration_mutation_pairs: list, file_output: bool = True):
+def simulated_annealing(
+    city: City, iteration_mutation_pairs: list, file_output: bool = True
+):
+    """
+    Simulated annealing algorithm that generates a green light cycle schedule for a given city
+
+    Parameters:
+        city: city for which the schedule will be generated
+        iteration_mutation_pairs: list of (number of iterations, mutation operator) pairs
+        file_output: whether the best final schedule will be saved to a file or not
+    """
     file = None
     if file_output:
         file = open(PATH, "w")
@@ -44,7 +54,8 @@ def simulated_annealing(city: City, iteration_mutation_pairs: list, file_output:
             )
             if file_output:
                 file.write(
-                    f"{t},{current_schedule.last_score},{probability},{score_diff}\n")
+                    f"{t},{current_schedule.last_score},{probability},{score_diff}\n"
+                )
                 file.flush()
 
             if score_diff > 0 or random() < probability:
@@ -60,14 +71,15 @@ def scheduling_function(t: float, T0=3000):
 
 def print_sa_results_graph_from_file():
     with open(PATH) as f:
-        metrics = [list(map(lambda i: i.strip('\n'), x.split(',')))
-                   for x in f.readlines()[1:]]
+        metrics = [
+            list(map(lambda i: i.strip("\n"), x.split(","))) for x in f.readlines()[1:]
+        ]
 
     xs = np.array([int(x[0]) for x in metrics])
     scores = np.array([int(x[1]) for x in metrics])
     plt.plot(xs, scores)
 
-    plt.title('Simulated annealing')
+    plt.title("Simulated annealing")
 
     plt.xlabel("Iteration")
     plt.ylabel("Solution score")
