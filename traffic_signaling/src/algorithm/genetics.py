@@ -226,6 +226,17 @@ def genetic_evaluation(schedule: Schedule, genetic_mapping: dict, bonus: int):
 
 
 def chromossome_mapping(schedule: Schedule, mapping: dict):
+    """
+    Maps the chromossomes of a schedule into a genetic map dictionary.
+    A chromossome is considered to be the time attributed to a given street on a given intersection.
+
+    Parameters:
+        schedule: schedule whose chromosses will be mapped
+        mapping: dictionary that will be updated with schedule's chromossomes
+
+    Return:
+        mapping dict updated with schedule's chromossomes
+    """
     for intersection_id, intersection_schedule in schedule.schedule.items():
         if not (intersection_id in mapping.keys()):
             mapping[intersection_id] = {}
