@@ -4,6 +4,16 @@ from random import randint, random
 
 
 def generate_random_solution(city: City, schedule_generator):
+    """
+    Generates a random green light cycle schedule for a given city.
+
+    Parameters:
+        city: City for which the schedule will be created.
+        schedule_generator: function responsible for creating a schedule for each intersection. See permutation functions below
+
+    Return:
+        A newly created schedule for the given city
+    """
     schedule = Schedule()
 
     for intersection_id, intersection in city.intersections.items():
