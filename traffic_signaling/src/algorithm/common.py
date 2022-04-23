@@ -49,7 +49,7 @@ def distributed_random_sum_permutation(length: int, perm_sum: int):
 def distributed_sum_permutation(length: int, perm_sum: int):
     """
     Creates a list of lenght length of integers with a sum inferior than perm_sum.
-    If length is larger that perm_sum, generates a random permutation of integer values.
+    If length is larger that perm_sum, generates a random permutation of integer values, , with the same sum condition.
     Else, the list is filled with 1s.
 
     Parameters:
