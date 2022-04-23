@@ -12,6 +12,19 @@ EXPORT_PATH = "traffic_signaling/asset/out"
 
 class MainController:
     def __init__(self) -> None:
+        """
+        Constructor of MainController class
+
+        Properties:
+            title (string): main title of the program
+            menu (list): options list for the main menu of the program 
+            genetic_params (list): list of params (integers) for the genetic algorithm 
+            genetic_params2 (list): list of params (floats) for the genetic algorithm
+            tabu_params (list): list of params (integers) for the tabu search
+            annealing_params (list): list of params (integers) for the simulated annealing algorithm
+            ils_params (list): list of params (integers) for the iterative local search
+            cities (list): list of available cities
+        """
         self.title = "Traffic Signaling - Hash Code Problem"
         self.menu = ["Genetic Algorithm", "Tabu Search", "Simulated Annealing",
                      "Iterated Local Search"]
@@ -38,6 +51,7 @@ class MainController:
                        "City F - 1662 intersections"]
 
     def main_loop(self):
+        '''Main loop of the program which provides a clean interface for the user'''
         option = 0
         err = False
         while 1:
@@ -106,6 +120,15 @@ class MainController:
                 controller.simulate(schedule)
 
     def get_params(self, params_list):
+        """
+        Get an integer given by the user for each param in params_list.
+
+        Parameters:
+            params_list (list): List of parameters to get from the user
+
+        Return:
+            list with the input given by the user
+        """
         params = []
 
         for i in range(len(params_list)):
