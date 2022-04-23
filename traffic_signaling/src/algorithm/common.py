@@ -127,12 +127,7 @@ def mutate_single_street(city: City, schedule: Schedule):
         sum(list(current_intersection_schedule_dict.values())) - street_time
     )
 
-    current_intersection_schedule_dict[street] = randint(
-        0, remaining_time
-    )  # isto está a dar problema.
-    # Numa das vezes, deu negativo, o que pode indicar
-    # Um schedule maior do que o tempo total da simulação
-    # print(sum(list(current_intersection_schedule_dict.values())), city.duration) # debug
+    current_intersection_schedule_dict[street] = randint(0, remaining_time)
 
     schedule.schedule[intersection_id] = [
         street_name
