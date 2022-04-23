@@ -202,6 +202,19 @@ def next_generation(
 
 
 def genetic_evaluation(schedule: Schedule, genetic_mapping: dict, bonus: int):
+    """
+    Evaluates a schedule based on how rare its genes are.
+    For each rarest chromossome within the mapped chromossomes, it receives bonus points.
+    For each unmapped chromossome or intersection, it receives a 2*bonus points.
+
+    Parameters:
+        schedule: schedule to be evaluated
+        genetic_mapping: mapping of chromossomes
+        bonus: integer value to be added to the final score on previously given conditions
+
+    Return:
+        schedule genetic score
+    """
     score = 0
 
     for intersection_id, intersection_schedule in schedule.schedule.items():
@@ -227,7 +240,7 @@ def genetic_evaluation(schedule: Schedule, genetic_mapping: dict, bonus: int):
 
 def chromossome_mapping(schedule: Schedule, mapping: dict):
     """
-    Maps the chromossomes of a schedule into a genetic map dictionary.
+    Maps the chromossomes of a schedule into a genetic map dictionary, which counts the occurrence of a given chromossome.
     A chromossome is considered to be the time attributed to a given street on a given intersection.
 
     Parameters:
