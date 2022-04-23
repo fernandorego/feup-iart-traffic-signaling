@@ -1,12 +1,22 @@
 from random import randint
-
-from algorithm.common import distributed_sum_permutation, generate_random_solution, mutate_intersection, mutate_schedule
+from algorithm.common import distributed_random_sum_permutation, generate_random_solution, mutate_intersection
 from model.city import City
+import numpy as np
+from matplotlib import pyplot as plt
+
+PATH = "traffic_signaling/asset/out/taboo_result.csv"
 
 
-def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_iteration: int, max_worse_jump_percentage=0.1):
+def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_iteration: int,
+                 max_worse_jump_percentage: int = 0.1, file_output: bool = True):
+    file = None
+    if file_output:
+        file = open(PATH, "w")
+        file.write("ITERATION,TENTATIVE_SCORE,BEST_SCORE\n")
+        file.flush()
+
     first_solution = generate_random_solution(
-        city, distributed_sum_permutation)
+        city, distributed_random_sum_permutation)
     current = first_solution, first_solution.evaluate(city)
     avg_score = current[1]
     current_max = current
@@ -34,7 +44,29 @@ def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_
         improvement_to_max = current[1] - current_max[1]
         if improvement_to_max > 0:
             current_max = current
-        else:
-            if -improvement_to_max > avg_score//(1/max_worse_jump_percentage):
-                current = current_max
+
+        print(
+            f"On iteration {i}, taboo search found a score of {current[1]}. Best score yet is {current_max[1]}")
+        if file_output:
+            file.write(f"{i},{current[1]},{current_max[1]}\n")
+            file.flush()
+
+        if -improvement_to_max > avg_score//(1/max_worse_jump_percentage):
+            current = current_max
+
     return current_max[0]
+
+
+def print_taboo_results_graph_from_file():
+    with open(PATH) as f:
+        metrics = [y for x in f.readlines()[1:] for y in x.strip('\n')]
+
+    xs = np.array([int(x[0]) for x in metrics])
+    ys = np.array([int(x[1]) for x in metrics])
+    plt.plot(xs, ys)
+
+    plt.title('Taboo search')
+
+    plt.xlabel("Iteration")
+    plt.ylabel("Solution score")
+    plt.show()

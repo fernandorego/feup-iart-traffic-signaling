@@ -128,5 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+<<<<<<< HEAD
 nando
 bruno
+=======
+# CSV files
+*.csv
+>>>>>>> algorithms

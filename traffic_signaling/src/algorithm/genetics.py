@@ -1,17 +1,22 @@
+from cProfile import label
+from .common import (
+    generate_random_solution,
+    mutate_schedule,
+    distributed_random_sum_permutation,
+)
+from model.schedule import Schedule
+from model.city import City
 from random import randint, random
 from multiprocessing import Process, Queue, Manager
 from math import ceil
 from toolz import unique
 
+import numpy as np
+from matplotlib import pyplot as plt
+
 import os
 
-from model.city import City
-from model.schedule import Schedule
-from .common import (
-    generate_random_solution,
-    distributed_sum_permutation,
-    mutate_intersection,
-)
+PATH = "traffic_signaling/asset/out/genetic_result.csv"
 
 
 def genetic_algorithm_process(
@@ -20,10 +25,11 @@ def genetic_algorithm_process(
     population_size: int,
     mutation_chance: float,
     result: Queue,
+    file
 ):
 
     population = [
-        generate_random_solution(city, distributed_sum_permutation)
+        generate_random_solution(city, distributed_random_sum_permutation)
         for _ in range(population_size)
     ]
 
@@ -40,7 +46,7 @@ def genetic_algorithm_process(
             city,
             population,
             population_size,
-            mutate_single_street,
+            lambda x: mutate_schedule(city, x, 0.1),
             cross_over,
             (
                 lambda x: x.last_score
@@ -53,9 +59,13 @@ def genetic_algorithm_process(
         for schedule in population:
             genetic_map = chromossome_mapping(schedule, genetic_map)
 
+        average = sum([x.last_score for x in population]) / len(population)
+        process = os.getpid()
         print(
-            f"Process {os.getpid()} at generation {generation} scored an average of {sum([x.last_score for x in population]) / len(population)}"
-        )
+            f"Process {process} at generation {generation} scored an average of {int(average)}")
+        if file is not None:
+            file.write(f"1,{process},{generation},{average}\n")
+            file.flush()
 
     print([x.last_score for x in population])
 
@@ -69,12 +79,19 @@ def genetic_algorithm(
     population_size: int,
     subpopulation_size: int,
     mutation_chance: float,
+    file_output: bool = True
 ):
     population = []
     processes = []
     result = Manager().Queue()
     remaining = population_size
     subpopulation = subpopulation_size
+
+    file = None
+    if file_output:
+        file = open("traffic_signaling/asset/out/genetic_result.csv", "w")
+        file.write("PHASE,PROCESS,GENERATION,AVERAGE\n")
+        file.flush()
 
     for _ in range(ceil(population_size / subpopulation_size)):
         if remaining < subpopulation_size:
@@ -88,10 +105,10 @@ def genetic_algorithm(
                     subpopulation,
                     mutation_chance,
                     result,
+                    file
                 ),
             )
         )
-
         remaining -= subpopulation_size
 
     for process in processes:
@@ -124,15 +141,18 @@ def genetic_algorithm(
             city,
             population,
             population_size,
-            mutate_single_street,
+            lambda x: mutate_schedule(city, x, 0.1),
             cross_over,
             (lambda x: x.last_score),
             mutation_chance,
         )
 
-        print(
-            f"Generation {generation} scored an average of {sum([x.last_score for x in population]) / len(population)}"
-        )
+        average = sum([x.last_score for x in population]) / len(population)
+        process = os.getpid()
+        print(f"Generation {generation} scored an average of {average}")
+        if file is not None:
+            file.write(f"2,{process},{generation},{int(average)}\n")
+            file.flush()
 
     print(f"Final population: {[x.last_score for x in population]}")
     return population[0]
@@ -149,7 +169,7 @@ def next_generation(
 ):
     for schedule in population:
         if random() <= mutation_chance:
-            schedule = mutation_operator(city, schedule)
+            schedule = mutation_operator(schedule)
             schedule.evaluate(city)
 
     for index in range(int(len(population) / 4)):
@@ -247,7 +267,7 @@ def mutate_random_intersection(city: City, schedule: Schedule):
         randint(0, len(intersections) - 1)
     ]
 
-    intersection_schedule = distributed_sum_permutation(
+    intersection_schedule = distributed_random_sum_permutation(
         len(intersection.incoming_streets), city.duration
     )
     schedule.schedule[intersection_id] = []
@@ -288,3 +308,34 @@ def mutate_single_street(city: City, schedule: Schedule):
     ]
 
     return schedule
+
+
+def print_genetic_results_graph_from_file():
+    with open(PATH) as f:
+        metrics = [list(map(lambda i: i.strip('\n'), x.split(',')))
+                   for x in f.readlines()[1:]]
+
+    processes = set(int(x[1]) for x in metrics)
+    xs = np.array(list(set(int(x[2]) for x in metrics if int(x[0]) == 1)))
+
+    # First phase
+    for process in processes:
+        ys = np.array([float(x[3]) for x in metrics if int(
+            x[0]) == 1 and int(x[1]) == process])
+        if len(ys) == 0:
+            continue
+        plt.plot(xs, ys, label=f'Process {process}')
+    plt.legend(loc="upper left", frameon=False)
+    plt.title('Genetic algorithm: concurrent phase')
+    plt.xlabel("Iteration")
+    plt.ylabel("Solution score")
+    plt.show()
+
+    # Second phase
+    plt.clf()
+    ys = np.array([float(x[3]) for x in metrics if int(x[0]) == 2])
+    plt.plot(xs, ys)
+    plt.title('Genetic algorithm: merged population phase')
+    plt.xlabel("Iteration")
+    plt.ylabel("Solution score")
+    plt.show()
