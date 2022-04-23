@@ -38,15 +38,14 @@ class CityController:
         return
 
     def simulate(self):
-        if self.schedule == None:
-            print('ERROR: Schedule is missing')
-            return 1
-
+        # setup simulation helpers
         street_queue = {street_id: deque()
                         for street_id in range(self.city.no_streets)}
-
-        green_cycle_duration = {intersection_id: len(self.schedule.schedule[intersection_id])
-                                for intersection_id in self.schedule.schedule}
+        green_cycle_duration, last_crossed = {}, {}
+        for intersection_id in self.schedule.schedule:
+            green_cycle_duration[intersection_id] = len(
+                self.schedule.schedule[intersection_id])
+            last_crossed[intersection_id] = -1
 
         car_path = {}
         next_analysed_time = {}
@@ -55,15 +54,16 @@ class CityController:
             street_queue[car_path[car.id][0].id].append(car.id)
             next_analysed_time[car.id] = 0
 
+        # run simulation
         score = 0
         for current_time in range(self.city.duration + 1):
-            crossed_intersections = []
             scheduled_removals = []
             green_lights_streets = []
 
             for id, intersection in self.schedule.schedule.items():
-                green_lights_streets.append(
-                    intersection[current_time % green_cycle_duration[id]])
+                if green_cycle_duration[id] != 0:
+                    green_lights_streets.append(
+                        intersection[current_time % green_cycle_duration[id]])
 
             cars_position = {car_id: [car_path[car_id][0].id, max(next_analysed_time[car_id] - current_time, 0)]
                              for car_id in car_path}
@@ -72,32 +72,41 @@ class CityController:
                 if next_analysed_time[car_id] > current_time:
                     continue
                 street = car_path[car_id][0]
-                if street_queue[street.id][0] != car_id:
+                if street_queue[car_path[car_id][0].id][0] != car_id:
                     continue
                 intersection_id = self.city.street_intersection[street.name]
-                light_is_green = self.schedule.schedule[intersection_id][current_time %
-                                                                         green_cycle_duration[intersection_id]] == street.name
-                if not light_is_green or intersection_id in crossed_intersections:
+                if not (intersection_id in self.schedule.schedule.keys()):
                     continue
-
-                crossed_intersections.append(intersection_id)
+                if green_cycle_duration[intersection_id] == 0:
+                    light_is_green = False
+                else:
+                    light_is_green = (
+                        self.schedule.schedule[intersection_id][
+                            current_time % green_cycle_duration[intersection_id]
+                        ]
+                        == street.name
+                    )
+                if not light_is_green or last_crossed[intersection_id] == current_time:
+                    continue
+                last_crossed[intersection_id] = current_time
                 street_queue[street.id].popleft()
                 car_path[car_id].popleft()
-
-                if len(car_path[car_id]) == 0:
+                next_street = car_path[car_id][0]
+                next_time = current_time + next_street.length
+                if len(car_path[car_id]) == 1:
                     scheduled_removals.append(car_id)
-                    score += self.city.car_value + self.city.duration - next_time
+                    if next_time <= self.city.duration:
+                        score += self.city.car_value + self.city.duration - next_time
                 else:
-                    next_street = car_path[car_id][0]
-                    next_time = current_time + next_street.length
                     street_queue[next_street.id].append(car_id)
                     next_analysed_time[car_id] = next_time
             for car_id in scheduled_removals:
                 del car_path[car_id]
 
             self.draw(green_lights_streets, cars_position, current_time, score)
-
             sleep(1)
+
+        return score
 
     def draw(self, green_lights, cars_position, current_time, score):
         bg = pygame.transform.scale(
