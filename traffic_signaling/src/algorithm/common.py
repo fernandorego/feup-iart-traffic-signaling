@@ -58,6 +58,16 @@ def mutate_intersection(city: City, schedule: Schedule) -> tuple[Schedule, int]:
 
 
 def mutate_single_street(city: City, schedule: Schedule):
+    """
+    Changes the green light time for a single random street on a random intersection on a given schedule for a given city.
+
+    Parameters:
+        city: a city object
+        schedule: green light schedule for the city
+
+    Return:
+        schedule with updated green light cycle
+    """
     intersections = list(city.intersections.keys())
     intersection_id = intersections[randint(0, len(intersections) - 1)]
     current_intersection_schedule = schedule.schedule[intersection_id]
