@@ -27,6 +27,19 @@ def genetic_algorithm_process(
     result: Queue,
     file,
 ):
+    """
+    Genetic algorithm that generates a population of green light schedules for a given city.
+    This function is intended to be called as an entry point for a child process.
+    Instead of just searching for a better score, it also promotes rarer chromossomes.
+
+    Parameters:
+        city: city for which the schedules will be created
+        number_of_generations: number of generations upon which the population will evolve
+        population_size: max size of the population
+        mutation_chance: probability of a schedule mutating from one generation to another
+        result: multiprocess queue, through which the results will be passed to the parent process
+        file: file where the evolution of the population will be registered. None if no register is needed
+    """
 
     population = [
         generate_random_solution(city, distributed_random_sum_permutation)
