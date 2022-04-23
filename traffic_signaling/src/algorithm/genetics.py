@@ -11,7 +11,6 @@ from .common import (
     generate_random_solution,
     mutate_schedule,
     distributed_random_sum_permutation,
-    mutate_intersection,
 )
 
 
@@ -21,6 +20,7 @@ def genetic_algorithm_process(
     population_size: int,
     mutation_chance: float,
     result: Queue,
+    file
 ):
 
     population = [
@@ -28,7 +28,8 @@ def genetic_algorithm_process(
         for _ in range(population_size)
     ]
 
-    print(f"Starting process {os.getpid()} with a population of size {population_size}")
+    print(
+        f"Starting process {os.getpid()} with a population of size {population_size}")
 
     genetic_map = {}
     for schedule in population:
@@ -53,9 +54,13 @@ def genetic_algorithm_process(
         for schedule in population:
             genetic_map = chromossome_mapping(schedule, genetic_map)
 
+        average = sum([x.last_score for x in population]) / len(population)
+        process = os.getpid()
         print(
-            f"Process {os.getpid()} at generation {generation} scored an average of {sum([x.last_score for x in population]) / len(population)}"
-        )
+            f"Process {process} at generation {generation} scored an average of {int(average)}")
+        if file is not None:
+            file.write(f"1,{process},{generation},{average}\n")
+            file.flush()
 
     print([x.last_score for x in population])
 
@@ -69,12 +74,19 @@ def genetic_algorithm(
     population_size: int,
     subpopulation_size: int,
     mutation_chance: float,
+    file_output: bool = True
 ):
     population = []
     processes = []
     result = Manager().Queue()
     remaining = population_size
     subpopulation = subpopulation_size
+
+    file = None
+    if file_output:
+        file = open("traffic_signaling/asset/out/genetic_result.csv", "w")
+        file.write("PHASE,PROCESS,GENERATION,AVERAGE\n")
+        file.flush()
 
     for _ in range(ceil(population_size / subpopulation_size)):
         if remaining < subpopulation_size:
@@ -88,10 +100,10 @@ def genetic_algorithm(
                     subpopulation,
                     mutation_chance,
                     result,
+                    file
                 ),
             )
         )
-
         remaining -= subpopulation_size
 
     for process in processes:
@@ -130,9 +142,12 @@ def genetic_algorithm(
             mutation_chance,
         )
 
-        print(
-            f"Generation {generation} scored an average of {sum([x.last_score for x in population]) / len(population)}"
-        )
+        average = sum([x.last_score for x in population]) / len(population)
+        process = os.getpid()
+        print(f"Generation {generation} scored an average of {average}")
+        if file is not None:
+            file.write(f"2,{process},{generation},{int(average)}\n")
+            file.flush()
 
     print(f"Final population: {[x.last_score for x in population]}")
     return population

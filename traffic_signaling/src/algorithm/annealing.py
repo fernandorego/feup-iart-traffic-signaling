@@ -3,15 +3,19 @@ from math import log, exp
 from random import random
 from model.city import City
 from .common import (
-    distributed_sum_permutation,
     generate_random_solution,
     distributed_random_sum_permutation,
 )
 
 
-def simulated_annealing(city: City, iteration_mutation_pairs: list):
-    t = 0
+def simulated_annealing(city: City, iteration_mutation_pairs: list, file_output: bool = True):
+    file = None
+    if file_output:
+        file = open("traffic_signaling/asset/out/sa_result.csv", "w")
+        file.write("INSTANT,SCORE,PROBABILITY,DIFF\n")
+        file.flush()
 
+    t = 0
     current_schedule = generate_random_solution(
         city, distributed_random_sum_permutation
     )
@@ -29,14 +33,18 @@ def simulated_annealing(city: City, iteration_mutation_pairs: list):
             next_schedule.evaluate(city)
 
             score_diff = next_schedule.last_score - current_schedule.last_score
+            probability = exp(score_diff / T)
 
             print(
-                f"Current T = {T}, Probability = {exp(score_diff / T)}, Score_diff = {score_diff}"
+                f"Current T = {T}, Probability = {probability}, Score_diff = {score_diff}"
             )
+            if file_output:
+                file.write(
+                    f"{t},{current_schedule.last_score},{probability},{score_diff}\n")
+                file.flush()
 
-            if score_diff > 0 or random() < exp(score_diff / T):
+            if score_diff > 0 or random() < probability:
                 current_schedule = next_schedule
-
             t += 1
 
     return current_schedule
