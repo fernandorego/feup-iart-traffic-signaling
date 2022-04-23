@@ -124,6 +124,15 @@ class MainController:
         return params
 
     def get_params_float(self, params_list):
+        """
+        Get an float given by the user for each param in params_list.
+
+        Parameters:
+            params_list (list): List of parameters to get from the user
+
+        Return:
+            list with the input given by the user
+        """
         params = []
 
         for i in range(len(params_list)):
@@ -143,6 +152,12 @@ class MainController:
         return params
 
     def get_city(self):
+        """
+        Print all accessible cities and returns the city chosen by the user.
+
+        Return:
+            City chosen by the user
+        """
         print()
         for i in range(len(self.cities)):
             print(i+1, "-", self.cities[i])
@@ -168,6 +183,12 @@ class MainController:
                     err = True
 
     def get_option(self, msg):
+        """
+        Get a integer number from the user
+
+        Parameters:
+            msg (string): message to show when user input is requested
+        """
         try:
             option = int(input(msg))
             return option
@@ -176,6 +197,12 @@ class MainController:
         return -1
 
     def get_option_float(self, msg):
+        """
+        Get a float number from the user
+
+        Parameters:
+            msg (string): message to show when user input is requested
+        """
         try:
             option = float(input(msg))
             return option
@@ -184,6 +211,7 @@ class MainController:
         return -1
 
     def print_menu(self):
+        '''Print the main menu'''
         print()
         print(self.title, '\n')
         for i in range(len(self.menu)):

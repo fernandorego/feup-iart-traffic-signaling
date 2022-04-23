@@ -2,9 +2,9 @@ import pygame
 import math
 from collections import deque
 from time import sleep
-from traffic_signaling.src.model.city import City
-from traffic_signaling.src.model.schedule import Schedule
-from traffic_signaling.src.view.city_viewer import CityViewer
+from model.city import City
+from model.schedule import Schedule
+from view.city_viewer import CityViewer
 
 BG_COLOR = (50, 220, 230)
 BG_IMAGE = 'traffic_signaling/asset/img/grass.jpg'
