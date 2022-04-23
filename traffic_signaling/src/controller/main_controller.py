@@ -7,6 +7,8 @@ from algorithm.genetics import genetic_algorithm, print_genetic_results_graph_fr
 from algorithm.annealing import simulated_annealing, print_sa_results_graph_from_file
 from algorithm.common import mutate_schedule, mutate_intersection, mutate_single_street
 
+EXPORT_PATH = "traffic_signaling/asset/out"
+
 
 class MainController:
     def __init__(self) -> None:
@@ -62,7 +64,8 @@ class MainController:
                     schedule = genetic_algorithm(city, params[0], params[1],
                                                  params[2], params2[0])
                     print_genetic_results_graph_from_file()
-                    schedule.write_to_file('.', 'my_solution.txt')
+                    schedule.write_to_file(
+                        EXPORT_PATH, 'genetic_last_solution.txt')
                 case 2:
                     params = self.get_params(self.tabu_params)
                     params2 = self.get_params_float(self.tabu_params2)
@@ -72,7 +75,8 @@ class MainController:
                     schedule: Schedule = taboo_search(
                         city, params[0], params[1], params2[0])
                     print_taboo_results_graph_from_file()
-                    schedule.write_to_file('.', 'my_solution.txt')
+                    schedule.write_to_file(
+                        EXPORT_PATH, 'tabu_last_solution.txt')
                 case 3:
                     params = self.get_params(self.annealing_params)
                     if params == []:
@@ -83,7 +87,8 @@ class MainController:
                     schedule: Schedule = simulated_annealing(
                         city, iteration_mutation_pairs)
                     print_sa_results_graph_from_file()
-                    schedule.write_to_file('.', 'my_solution.txt')
+                    schedule.write_to_file(
+                        EXPORT_PATH, 'sim_annealing_last_solution.txt')
                 case 4:
                     params = self.get_params(self.ils_params)
                     if params == []:
@@ -92,7 +97,8 @@ class MainController:
                     schedule: Schedule = iterated_local_search(
                         city, params[0], params[1])
                     print_ils_results_graph_from_file()
-                    schedule.write_to_file('.', 'my_solution.txt')
+                    schedule.write_to_file(
+                        EXPORT_PATH, 'ils_last_solution.txt')
                 # case 5:
                 #    city = self.get_city()
                 #    schedule: Schedule = genetic_algorithm(
