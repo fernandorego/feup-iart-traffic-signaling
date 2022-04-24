@@ -24,10 +24,23 @@ RED_LIGHT_IMAGE = 'traffic_signaling/asset/img/red.png'
 
 class CityViewer:
     def __init__(self, city: City) -> None:
-        self.city = city
-        self.streets = self.get_roads()
+        """
+        Constructor of CityViewer class
 
-    def get_roads(self):
+        Properties:
+            city (City): city with all the intersections of the problem
+            streets (list): list of all streets that belong to the city
+        """
+        self.city = city
+        self.streets = self.get_streets()
+
+    def get_streets(self):
+        """
+        Obtains all the streets (name, lenght, start/end intersection, etc) from the city
+
+        Returns:
+            list with all streets that belong to the city
+        """
         streets = []
         for id1, intersection1 in self.city.intersections.items():
             for outcoming in intersection1.outgoing_streets:
@@ -44,9 +57,18 @@ class CityViewer:
         return streets
 
     def draw(self, window, green_lights_streets, cars_position) -> None:
+        """
+        Draw the city state starting by drawing each street as well the cars that are going through them.
+        Finally the intersections are drawn with the indication of the rescpective id
+
+        Parameters:
+            window (Surface): pygame window for display
+            green_lights_streets (list): list of all the green lights of the city in the current state
+            cars_position (list): list of the position of each car in the current state
+        """
         for street in self.streets:
             green = street[3] in green_lights_streets
-            self.draw_road(window, street, green)
+            self.draw_street(window, street, green)
 
             for id, info in cars_position.items():
                 if info[0] == street[0]:
@@ -57,7 +79,16 @@ class CityViewer:
         for id, intersection in self.city.intersections.items():
             self.draw_intersection(window, id, intersection, font)
 
-    def draw_road(self, window, street, green):
+    def draw_street(self, window, street, green):
+        """
+        Draws a street starting by calculating the slope of the street and its distance to
+        connect the two intersections 
+
+        Parameters:
+            window (Surface): pygame window for display
+            street (tuple): tuple with the necessary information about the street
+            green (boolean): true if the light is green, false otherwise (light is red)
+        """
         start_intersect_pos = self.city.intersections[street[1]].get_pos()
         end_intersect_pos = self.city.intersections[street[2]].get_pos()
 
@@ -89,6 +120,14 @@ class CityViewer:
                    pos[1] + round(BLOCKSIZE*sin(radians(angle))))
 
     def draw_car(self, window, street, l):
+        """
+        Draws a car in the right position of the street 
+
+        Parameters:
+            window (Surface): pygame window for display
+            street (tuple): tuple with the necessary information about the street
+            l (integer): lenght of the street already driven by the car
+        """
         start_intersect_pos = self.city.intersections[street[1]].get_pos()
         end_intersect_pos = self.city.intersections[street[2]].get_pos()
 
@@ -152,6 +191,12 @@ class CityViewer:
                           window_height - img.get_size()[1] - 40))
 
     def load_blocks(self, angle):
+        """
+        Load blocks for pygame (street, red and green image) and scale and rotate each image according to the angle of the street
+
+        Parameters:
+            angle (float): angle of the street
+        """
         green_block = pygame.image.load(GREEN_LIGHT_IMAGE).convert_alpha()
         green_block = pygame.transform.scale(
             green_block, (BLOCKSIZE, BLOCKSIZE))
@@ -169,6 +214,12 @@ class CityViewer:
                 pygame.transform.rotate(red_block, -angle))
 
     def load_car(self, angle):
+        """
+        Load car image, scale and rotate the image according to the angle of the street
+
+        Parameters:
+            angle (float): angle of the street
+        """
         car = pygame.image.load(CAR_IMAGE).convert_alpha()
         car = pygame.transform.scale(
             car, (CAR_LEN, CAR_WIDTH))

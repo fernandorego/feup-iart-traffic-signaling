@@ -17,7 +17,7 @@ class CityController:
         Constructor of CityController class
 
         Properties:
-            city (City): main title of the program
+            city (City): city with all the intersections of the problem
             city_viewer (CityViewer): City viewer to draw the different elements of the city
             schedule (Schedule): schedule of a possible solution 
             window (Surface): pygame window for display
@@ -128,7 +128,7 @@ class CityController:
         return score
 
     def draw(self, green_lights, cars_position, current_time, score):
-        '''Draw the city state and update screen'''
+        '''Draw the city with some informations about the current state and update screen'''
         bg = pygame.transform.scale(
             pygame.image.load(BG_IMAGE), self.window_size)
         self.window.blit(bg, (0, 0))
