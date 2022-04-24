@@ -66,6 +66,16 @@ def simulated_annealing(
 
 
 def scheduling_function(t: float, T0=3000):
+    """
+    Cooling schedule function for the simulated annealing algorithm.
+
+    Parameter:
+        t: independent variable
+        T0: initial value of the function. 3000 by default.
+
+    Return:
+        temperature for given instant
+    """
     return T0 / (1 + log(1 + t))
 
 
