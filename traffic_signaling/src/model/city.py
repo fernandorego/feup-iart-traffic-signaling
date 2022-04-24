@@ -15,6 +15,15 @@ class City:
         self.no_intersections = 0
 
     def from_input(input_file: str):
+        """
+        Read city from file, following Google's described format.
+
+        Parameters:
+            input_file: the input file path
+
+        Return:
+            read city
+        """
         with open(input_file) as f:
             lines = f.readlines()
         lines = [line.strip('\n').split(' ') for line in lines]

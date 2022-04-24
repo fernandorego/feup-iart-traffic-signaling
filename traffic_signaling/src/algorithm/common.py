@@ -139,6 +139,18 @@ def mutate_single_street(city: City, schedule: Schedule):
 
 
 def mutate_schedule(city, schedule, strength):
+    """
+    For a given schedule, replace intersection schedules by random ones
+    with given probability.
+
+    Parameters:
+        city: city for which the schedules were made
+        schedule: schedule to mutate
+        strength: probability of a schedule intersection be replaced by a random one
+
+    Return:
+        mutated schedule
+    """
     another_solution = generate_random_solution(
         city, distributed_random_sum_permutation
     )
@@ -146,6 +158,19 @@ def mutate_schedule(city, schedule, strength):
 
 
 def mix_solutions(city, base_schedule, foreigner_schedule, probability):
+    """
+    Inject foreigner schedule intersections in the base one
+    with given probability per intersection.
+
+    Parameters:
+        city: city for which the schedules were made
+        base_schedule: the default intersection source
+        foreigner_schedule: the schedules to inject in base
+        probability: probability of a foreign intersection being injected
+
+    Return:
+        mixed schedule
+    """
     perturbation = Schedule()
     for j in range(city.no_intersections):
         r = random()

@@ -2,3 +2,4 @@ pytest
 toolz
 numpy
 matplotlib
+pygame

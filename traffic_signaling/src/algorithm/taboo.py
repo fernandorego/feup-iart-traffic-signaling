@@ -9,7 +9,23 @@ PATH = "traffic_signaling/asset/out/taboo_result.csv"
 
 
 def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_iteration: int,
-                 max_worse_jump_percentage: int = 0.1, file_output: bool = True):
+                 max_worse_jump_percentage: int = 0.1, file_output: bool = True, initial_schedule=None):
+    """
+    For a given initial schedule, performs a taboo search.
+    The neighbourhood is given by the mutate_intersection operator, with the mutated intersection being the taboo criterion.
+    Resets to the best found global solution if current solution is given percentage worse than the aforementioned.
+
+    Parameters:
+        city: problem city
+        number_of_iterations: number of iterations until stopping
+        number_of_mutations_per_iteration: neighbourhood size to look for
+        max_worse_jump_percentage: max distance to global maxima before resetting to it
+        file_output: whether to write the results to a file
+        initial_schedule: the algorithm initial schedule (random if None)
+
+    Return:
+        Final best solution found
+    """
     file = None
     if file_output:
         file = open(PATH, "w")
@@ -17,7 +33,7 @@ def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_
         file.flush()
 
     first_solution = generate_random_solution(
-        city, distributed_random_sum_permutation)
+        city, distributed_random_sum_permutation) if initial_schedule is None else initial_schedule
     current = first_solution, first_solution.evaluate(city)
     avg_score = current[1]
     current_max = current
@@ -59,6 +75,10 @@ def taboo_search(city: City, number_of_iterations: int, number_of_mutations_per_
 
 
 def print_taboo_results_graph_from_file():
+    """
+    Show matplot graph in the screen containing the taboo search information
+    lastly written in a file in the default location.
+    """
     with open(PATH) as f:
         metrics = [list(map(lambda i: i.strip('\n'), x.split(',')))
                    for x in f.readlines()[1:]]

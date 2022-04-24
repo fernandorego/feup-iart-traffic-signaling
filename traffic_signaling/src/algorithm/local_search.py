@@ -21,6 +21,22 @@ def iterated_local_search(
     file_output: bool = True,
     initial_schedule=None
 ):
+    """
+    For a given initial schedule, performs a iterated local search.
+    Perturbations are implemented using the mutate_schedule operator with given factor and decreasing by time.
+    The neighbourhood is given by the mutate_intersection operator.
+
+    Parameters:
+        city: problem city
+        number_of_iterations: number of iterations until stopping
+        number_of_mutations_per_iteration: neighbourhood size to look for
+        perturbation_factor: multiplier to the probability of a intersection mutating in a perturbation
+        file_output: whether to write the results to a file
+        initial_schedule: the algorithm initial schedule (random if None)
+
+    Return:
+        Final best solution found
+    """
     file = None
     if file_output:
         file = open(PATH, "w")
@@ -56,6 +72,10 @@ def iterated_local_search(
 
 
 def print_ils_results_graph_from_file():
+    """
+    Show matplot graph in the screen containing the iterated local search information
+    lastly written in a file in the default location.
+    """
     with open(PATH) as f:
         metrics = [list(map(lambda i: i.strip('\n'), x.split(',')))
                    for x in f.readlines()[1:]]
