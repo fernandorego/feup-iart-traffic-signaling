@@ -150,6 +150,15 @@ class CityViewer:
         window.blit(car, rotated_center)
 
     def draw_intersection(self, window, id, intersection, font):
+        """
+        Draw intersection in the window
+
+        Parameters:
+            window (Surface): pygame window for display
+            id (integer): id of the intersection
+            intersection (Intersection): intersection to get the screen position to draw
+            font (Font): pygame Font object to write into a surface
+        """
         pygame.draw.circle(window, INTERSECTION_COLOR,
                            intersection.get_pos(), INTERSECTION_SIZE)
         img = font.render(str(id), True, ID_COLOR)
@@ -157,6 +166,14 @@ class CityViewer:
         window.blit(img, (pos[0] - 5, pos[1] - 7))
 
     def draw_infos(self, window, current_time, score):
+        """
+        Draw informations of the current state in the window
+
+        Parameters:
+            window (Surface): pygame window for display
+            current_time (integer): time of the current state
+            score (integer): score of the current state
+        """
         window_width, window_height = window.get_size()
         font = pygame.font.SysFont(None, FONT_SIZE)
         self.draw_time(font, window, window_width, current_time)
@@ -164,6 +181,15 @@ class CityViewer:
         self.draw_score(font, window, window_width, window_height, score)
 
     def draw_time(self, font, window, window_width, current_time):
+        """
+        Draw time of the current state in the window
+
+        Parameters:
+            font (Font): pygame Font object to write into a surface
+            window (Surface): pygame window for display
+            window_width (integer): width of the pygame window
+            current_time (integer): time of the current state
+        """
         img = font.render("Time Limit = " +
                           str(self.city.duration), True, TEXT_COLOR)
         window.blit(img, (window_width - img.get_size()[0] - 50, 40))
@@ -173,6 +199,13 @@ class CityViewer:
         window.blit(img, (window_width - img.get_size()[0] - 50, 70))
 
     def draw_streets_info(self, font, window):
+        """
+        Draw streets informations of the current state in the window
+
+        Parameters:
+            font (Font): pygame Font object to write into a surface
+            window (Surface): pygame window for display
+        """
         img = font.render("Start - End - Name - Time",
                           True, TEXT_COLOR)
         window.blit(img, (50, 40))
@@ -185,6 +218,16 @@ class CityViewer:
             height += 30
 
     def draw_score(self, font, window, window_width, window_height, score):
+        """
+        Draw score of the current state in the window
+
+        Parameters:
+            font (Font): pygame Font object to write into a surface
+            window (Surface): pygame window for display
+            window_width (integer): width of the pygame window
+            window_height (integer): height of the pygame window
+            score (integer): score of the current state
+        """
         img = font.render("Current Score = " +
                           str(score), True, TEXT_COLOR)
         window.blit(img, (window_width - img.get_size()[0] - 50,
@@ -196,6 +239,9 @@ class CityViewer:
 
         Parameters:
             angle (float): angle of the street
+
+        Return:
+            tuple with each block (street, red and green block)
         """
         green_block = pygame.image.load(GREEN_LIGHT_IMAGE).convert_alpha()
         green_block = pygame.transform.scale(
@@ -219,6 +265,9 @@ class CityViewer:
 
         Parameters:
             angle (float): angle of the street
+
+        Return:
+            car block to draw in the window
         """
         car = pygame.image.load(CAR_IMAGE).convert_alpha()
         car = pygame.transform.scale(
