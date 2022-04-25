@@ -8,6 +8,12 @@ class Schedule:
         self.last_score = -1
 
     def from_input(input_file: str):
+        """
+        Read schedule from file, following Google's described format.
+
+        Return:
+            read schedule
+        """
         with open(input_file) as f:
             lines = f.readlines()
         lines = [line.strip("\n").split(" ") for line in lines]
@@ -29,6 +35,13 @@ class Schedule:
         return schedule
 
     def write_to_file(self, path, file_name):
+        """
+        Write schedule to file, following Google's described format.
+
+        Parameters:
+            path: directory path to write to
+            file_name: name of the file to create
+        """
         f = open(path + "/" + file_name, "w")
         f.write(str(len(self.schedule)) + "\n")
         for intersection_id in self.schedule:
@@ -41,6 +54,16 @@ class Schedule:
         f.close()
 
     def evaluate(self, city: City):
+        """
+        Evaulation of the schedule in given city, using Google's scoring system.
+        The objective function to maximize.
+
+        Parameters:
+            city: the city to evaluate
+
+        Return:
+            schedule score
+        """
         # setup simulation helpers
         street_queue = {street_id: deque()
                         for street_id in range(city.no_streets)}
@@ -70,12 +93,15 @@ class Schedule:
                 intersection_id = city.street_intersection[street.name]
                 if not (intersection_id in self.schedule.keys()):
                     continue
-                light_is_green = (
-                    self.schedule[intersection_id][
-                        current_time % green_cycle_duration[intersection_id]
-                    ]
-                    == street.name
-                )
+                if green_cycle_duration[intersection_id] == 0:
+                    light_is_green = False
+                else:
+                    light_is_green = (
+                        self.schedule[intersection_id][
+                            current_time % green_cycle_duration[intersection_id]
+                        ]
+                        == street.name
+                    )
                 if not light_is_green or last_crossed[intersection_id] == current_time:
                     continue
                 last_crossed[intersection_id] = current_time

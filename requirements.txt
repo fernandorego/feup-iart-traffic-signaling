@@ -1,3 +1,5 @@
-python-dotenv
 pytest
 toolz
+numpy
+matplotlib
+pygame

@@ -7,14 +7,23 @@ class City:
     def __init__(self):
         self.cars = []
         self.streets = []
-        self.intersections = {}  # by intersection_id
-        self.street_intersection = {}  # by street name
+        self.intersections = {}
+        self.street_intersection = {}
         self.no_streets = 0
         self.duration = 0
         self.car_value = 0
         self.no_intersections = 0
 
     def from_input(input_file: str):
+        """
+        Read city from file, following Google's described format.
+
+        Parameters:
+            input_file: the input file path
+
+        Return:
+            read city
+        """
         with open(input_file) as f:
             lines = f.readlines()
         lines = [line.strip('\n').split(' ') for line in lines]

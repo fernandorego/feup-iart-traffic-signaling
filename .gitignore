@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Algorithms solution files
+*solution.txt
+
+# CSV files
+*.csv
